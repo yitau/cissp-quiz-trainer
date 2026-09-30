@@ -6,7 +6,7 @@
 
 # Wails
 /build/bin/
-wailsjs/
+frontend/wailsjs/
 
 # Frontend
 frontend/node_modules/
@@ -23,7 +23,7 @@ dist/
 /backups/
 /logs/
 
-# Environment
+# Environment / secrets
 .env
 .env.*
 !.env.example
