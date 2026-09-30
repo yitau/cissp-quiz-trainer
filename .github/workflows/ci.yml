@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  placeholder:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repository bootstrap
+        shell: pwsh
+        run: Write-Host "CI will be enabled after the Wails project is initialized."
