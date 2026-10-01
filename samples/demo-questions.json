@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "set": {"id": "demo-v1", "title": "功能演示 · 安全基础", "description": "4 道原创示例，仅用于验证软件功能，不是官方真题。", "createdAt": "2026-10-01T00:00:00Z"},
+  "questions": [
+    {"id":"DEMO-001","question":"A team wants to purchase a new security tool. What should it do FIRST?","options":{"A":"Buy the most expensive tool","B":"Identify the business risk and requirements","C":"Disable current controls","D":"Copy another company's configuration"},"answer":"B","explanation":"先明确业务风险和需求，才能选择合适的控制措施。","whyCorrect":"风险与业务目标决定控制措施的选择。","whyOthersWrong":{"A":"价格不能证明适用性。","C":"未经评估停用控制会增加风险。","D":"其他组织的配置不一定适合当前业务。"},"domain":1,"type":"FIRST","difficulty":"easy","tags":["Risk","演示"]},
+    {"id":"DEMO-002","question":"Which practice BEST supports least privilege?","options":{"A":"Grant every employee administrator access","B":"Share one privileged account","C":"Grant only access required for assigned duties","D":"Never review permissions"},"answer":"C","explanation":"最小权限要求仅授予完成职责必需的访问权限，并定期复核。","domain":5,"type":"BEST","difficulty":"easy","tags":["Least privilege","演示"]},
+    {"id":"DEMO-003","question":"What is the PRIMARY purpose of testing a backup restoration procedure?","options":{"A":"Verify that required data can be recovered","B":"Increase the number of backup files","C":"Replace access controls","D":"Guarantee that incidents never occur"},"answer":"A","explanation":"备份的实际价值是可恢复性，恢复演练用来验证数据和恢复流程。","domain":7,"type":"PRIMARY","difficulty":"easy","tags":["Recovery","演示"]},
+    {"id":"DEMO-004","question":"Which technique helps detect unintended changes to stored data?","options":{"A":"Removing all logs","B":"Publishing passwords","C":"Disabling validation","D":"Comparing cryptographic hashes with a trusted baseline"},"answer":"D","explanation":"与可信基线比较密码学哈希可帮助检测完整性变化，但不能单独证明变更原因。","domain":3,"type":"KNOWLEDGE","difficulty":"easy","tags":["Integrity","演示"]}
+  ]
+}

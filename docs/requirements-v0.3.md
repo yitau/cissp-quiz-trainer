@@ -663,6 +663,10 @@ Asset Security：100%
 
 ## 19. SQLite 数据库 Schema
 
+### v0.1 实施说明（2026-10-01）
+
+以下 19.1–19.10 是原始设计参考；实际 migration 001 采用满足首版的精简关系模型：`question_sets` 保存规范化导入文档与导入时间，`questions` 保存不可变题目 JSON（含选项/标签）及独立全局 ID、题集外键、题序和内容指纹；`quiz_sessions` / `quiz_answers` 独立存储会话、草稿、已计分答案及时间；`question_flags` 保存收藏；`app_settings` 保存配置。错题进度由完整作答历史计算，不另建易失配的进度副本。没有编辑/删除，因此无需题目版本表；后续变更必须新增 migration。JSON 文件契约保持 1.0 不变。具体业务口径见 [实施计划](implementation-plan.md)。
+
 ### 19.1 `question_sets`
 
 ```text
