@@ -2,3 +2,4 @@ export { ChooseImport, ConfirmImport, ListSets, SetQuestions, StartQuiz, GetSess
 export { domain } from '../../wailsjs/go/models'
 export { Statistics, Review, SetFavorite, StartReview } from '../../wailsjs/go/main/App'
 export { CreateBackup, RestoreBackup } from '../../wailsjs/go/main/App'
+export { DeleteUnusedSet, SetArchived } from '../../wailsjs/go/main/App'

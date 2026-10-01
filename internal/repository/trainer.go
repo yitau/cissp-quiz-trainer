@@ -7,6 +7,10 @@ import (
 )
 
 type Trainer interface {
+	DeleteUnusedSet(context.Context, string) error
+	SetArchived(context.Context, string, bool) error
+	// PrepareSnapshot only receives an extracted temporary copy, never the user's backup.
+	PrepareSnapshot(context.Context, string, int) error
 	Snapshot(context.Context, string) error
 	InspectSnapshot(context.Context, string) (domain.BackupContents, error)
 	RestoreSnapshot(context.Context, string) error

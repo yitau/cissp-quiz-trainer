@@ -1,6 +1,6 @@
 # v0.1 执行记录
 
-时区：Asia/Shanghai（UTC+08:00）。目标状态：本地开发交付及可执行范围验收完成；原生 UI 操作验收待人工。当前阶段：5（已完成交付，验收边界见下）。
+时区：Asia/Shanghai（UTC+08:00）。目标状态：v0.1.1 题集清理迭代及可执行范围验收完成；原生 UI 操作验收待人工。当前阶段：6。
 
 | 阶段 | 状态 | 关联提交 |
 | --- | --- | --- |
@@ -10,6 +10,7 @@
 | 3 复习与统计 | 已完成 | bfc64a5 |
 | 4 备份与日常使用 | 已完成 | 8bd2d1a |
 | 5 最终验收与交付 | 已完成 | 1190faf |
+| 6 题集删除与归档 | 已完成 | 本轮功能提交（下方补入） |
 
 ## 阶段 0 — 基线与业务规则
 
@@ -80,3 +81,17 @@
 
 - 分支：feature/mvp-v0.1。阶段提交：a58623d（基线）、24881f6（导入学习）、ca47ef9（考试历史）、bfc64a5（错题收藏统计）、8bd2d1a（备份恢复）、1190faf（验收打包说明）。本段作为最后的记录提交补入阶段关联号。
 - 阶段 5 实现提交后 `git status --short` 为空；本次仅进一步提交这份收据。忽略目录中保留本地依赖、构建产物与隔离验证记录，没有提交真实题库或数据库。原生 UI 人工验收限制仍有效。
+
+## 阶段 6 — 题集删除与归档
+
+- 状态：已完成（代码/测试/构建；原生 UI 验收待人工）。开始时间：2026-10-01 19:15 +08:00（Asia/Shanghai）。用户明确授权追加最小删除/归档功能；不做单题删除、批量删除和回收站。
+- 基线：feature/mvp-v0.1，工作区干净。已重新读取 AGENTS、README、计划/记录、实际数据库/服务/界面/备份调用链。
+- 决策：任何会话引用均阻止物理删除（含未完成草稿），归档保留全部关联记录；同页查看已归档及恢复显示。用新增归档表避免改写现有题目；保留旧版完整备份恢复能力。
+- 下一步：实现 migration 002、事务删除与归档服务、确认界面和回归测试；验证后更新产物与提交。
+- 2026-10-01 19:25:08 +08:00（Asia/Shanghai）：完成 migration 002、新增归档表、事务删除及二次检查、服务/绑定/API、日常/已归档筛选和恢复显示、删除确认 dialog（名称/题量/不可撤销/收藏说明，默认取消及 Escape）。产品 0.1.1，数据库 2；JSON 契约仍为 1.0。
+- 关键文件：internal/database/{database.go,migrations/002_set_archives.sql}、repository/sqlite/{set_management.go,trainer.go,backup.go}、service/{set_management.go,trainer.go,backup.go,set_management_test.go}、domain/{models.go,backup.go}、app.go、frontend/src/App.vue、components/DeleteSetDialog.vue、services/api.ts；更新 README、需求、使用说明、计划与本记录。
+- 旧版 App 0.1.0 / DB 1 备份可恢复：校验原始校验和/实际版本/schema，仅迁移解包的临时数据库，然后完整校验、安全备份、事务恢复。兼容 CRLF/LF schema；旧备份原文件未修改；新备份完整保留归档状态。
+- 新增定向命令 go test ./internal/service -run 'TestDelete|TestArchive|TestMigrationV1' -count=1 -v 通过。包括：无历史删除后重新导入、过期预览不重建删除题集、空会话/考试草稿/学习已计分/完成考试/收藏复习的删除保护、删除中途失败回滚、归档与取消归档幂等、归档后会话/统计/复习保留、重启及新旧备份恢复、伪造版本拒绝且原数据不变。
+- 全量 gofmt -w . / gofmt -l .、go vet ./...、go test ./... -count=1 -json、npm --prefix frontend run type-check、npm --prefix frontend run build、wails build -clean、scripts/package.ps1 全通过。测试证据 tmp/iteration6-tests.jsonl：15 顶层测试 + 22 子用例通过，失败 0。全部为临时隔离数据；没有运行真实数据删除。
+- 本地 EXE/ZIP 已重新打包（build/bin）：EXE 16,070,656 字节，ZIP 6,765,919 字节；SHA-256 分别为 de691673505d21e540dbe81251c3452e6d461c955af33aa807d8a2734e261724 / cb41355ee17572af83d305b754cb081f3740a36f6fb2bf5d835aebd49a421396。
+- git diff --check 通过。原生 UI 本轮没有操作验证，仍按 user-guide.md 删除/归档人工验收步骤核对对话框取消/确认、切换列表与键盘；不将类型检查或构建称为 UI 验收通过。下一步：使用更新 ZIP 进行人工界面验收。本地提交后继续保留不推送边界。

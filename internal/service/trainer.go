@@ -116,6 +116,9 @@ func (t *Trainer) Start(ctx context.Context, setID, mode string) (domain.Session
 	title := ""
 	for _, s := range sets {
 		if s.ID == setID {
+			if s.Archived {
+				return domain.Session{}, fmt.Errorf("题集已归档，请先恢复显示后再开始整套练习")
+			}
 			title = s.Title
 		}
 	}

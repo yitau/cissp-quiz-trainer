@@ -8,13 +8,17 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 	_ "modernc.org/sqlite"
 )
 
-const Version = 1
+const Version = domain.DatabaseVersion
 
 //go:embed migrations/001_initial.sql
 var initial string
+
+//go:embed migrations/002_set_archives.sql
+var setArchives string
 
 func Open(path string) (*sql.DB, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
@@ -50,13 +54,20 @@ func initialize(db *sql.DB) error {
 		if tables != 0 {
 			return fmt.Errorf("未标记版本的已有数据库，拒绝自动改写")
 		}
+	}
+	if version < Version {
 		tx, err := db.BeginTx(context.Background(), nil)
 		if err != nil {
 			return err
 		}
 		defer tx.Rollback()
-		if _, err := tx.Exec(initial); err != nil {
-			return fmt.Errorf("数据库迁移 001：%w", err)
+		if version == 0 {
+			if _, err := tx.Exec(initial); err != nil {
+				return fmt.Errorf("数据库迁移 001：%w", err)
+			}
+		}
+		if _, err := tx.Exec(setArchives); err != nil {
+			return fmt.Errorf("数据库迁移 002：%w", err)
 		}
 		if err := tx.Commit(); err != nil {
 			return err

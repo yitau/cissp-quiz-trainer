@@ -1,7 +1,7 @@
 package domain
 
-const AppVersion = "0.1.0"
-const DatabaseVersion = 1
+const AppVersion = "0.1.1"
+const DatabaseVersion = 2
 
 type StoredQuestion struct {
 	SetID    string

@@ -228,3 +228,16 @@ func (a *App) RestoreBackup() (string, error) {
 	value, err := a.trainer.Restore(a.ctx, path, filepath.Join(a.dataDir, "backups"))
 	return value, a.report(err)
 }
+
+func (a *App) DeleteUnusedSet(id string) error {
+	if err := a.ready(); err != nil {
+		return err
+	}
+	return a.report(a.trainer.DeleteUnusedSet(a.ctx, id))
+}
+func (a *App) SetArchived(id string, archived bool) error {
+	if err := a.ready(); err != nil {
+		return err
+	}
+	return a.report(a.trainer.SetArchived(a.ctx, id, archived))
+}

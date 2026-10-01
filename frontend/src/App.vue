@@ -2,10 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import * as api from './services/api'
 import StatisticsTable from './components/StatisticsTable.vue'
+import DeleteSetDialog from './components/DeleteSetDialog.vue'
 import { useTrainer } from './stores/trainer'
 const store = useTrainer()
 const dataDir = ref('')
 const page = ref('library')
+const showArchived = ref(false)
+const visibleSets = computed(() => store.sets.filter(s => s.archived === showArchived.value))
+const deleteTarget = ref<api.domain.SetSummary | null>(null)
 const reviewKind = ref('wrong')
 const reviewItems = computed(() => store.review.filter(q => reviewKind.value === 'wrong' ? q.wrong > 0 : q.favorite))
 const isFavorite = computed(() => store.review.find(q => q.question.id === item.value?.question.id)?.favorite ?? false)
@@ -28,6 +32,23 @@ function choose() { store.run(async () => { preview.value = null; const p = awai
 function importSet() { store.run(async () => { if (!preview.value) return; await api.ConfirmImport(preview.value.token); preview.value = null; store.notice = '题集导入成功'; await store.refresh() }) }
 function favorite(id: string, value: boolean) { store.run(async () => { await api.SetFavorite(id, value); await store.refresh() }) }
 function reviewStart() { store.run(async () => { await openSession(await api.StartReview(reviewKind.value)); await store.refresh() }) }
+function askDelete(set: api.domain.SetSummary) { store.error = ''; deleteTarget.value = set }
+function deleteSet(id: string) {
+  store.run(async () => {
+    await api.DeleteUnusedSet(id)
+    deleteTarget.value = null; browsing.value = []; preview.value = null
+    await store.refresh()
+    store.notice = '题集已删除'
+  })
+}
+function archiveSet(id: string, archived: boolean) {
+  store.run(async () => {
+    await api.SetArchived(id, archived)
+    browsing.value = []
+    await store.refresh()
+    store.notice = archived ? '题集已归档，历史、错题、收藏和统计继续保留' : '题集已恢复显示'
+  })
+}
 function viewSet(id: string) { store.run(async () => { browsing.value = await api.SetQuestions(id) }) }
 const date = (value: string) => value ? new Date(value).toLocaleString('zh-CN') : '进行中'
 function backup() { store.run(async () => { const path = await api.CreateBackup(); if (path) store.notice = '备份已保存：' + path }) }
@@ -36,15 +57,35 @@ onMounted(() => store.run(async () => { dataDir.value = await api.DataDirectory(
 </script>
 <template>
   <div class="app-shell">
-    <header><div><p class="eyebrow">本地学习 · 每日积累</p><h1>CISSP Quiz Trainer</h1></div><span class="badge">v0.1 · 离线使用</span></header>
+    <DeleteSetDialog :target="deleteTarget" :busy="store.busy" :error="store.error" @confirm="deleteSet" @cancel="deleteTarget = null"/>
+    <header><div><p class="eyebrow">本地学习 · 每日积累</p><h1>CISSP Quiz Trainer</h1></div><span class="badge">v0.1.1 · 离线使用</span></header>
     <nav aria-label="主要导航"><button :class="{active: page === 'library'}" @click="page = 'library'">题库与导入</button><button :class="{active: page === 'history'}" @click="page = 'history'">练习记录</button><button :class="{active: page === 'review'}" @click="page = 'review'">错题与收藏</button><button :class="{active: page === 'stats'}" @click="page = 'stats'">统计与备份</button><button v-if="store.session" :class="{active: page === 'quiz'}" @click="page = 'quiz'">当前答题</button></nav>
     <p v-if="store.error" class="message error" role="alert">{{ store.error }}</p><p v-if="store.notice" class="message" role="status">{{ store.notice }}</p><p v-if="store.busy" role="status">正在处理，请稍候…</p>
     <main :aria-busy="store.busy">
       <section v-if="page === 'library'">
         <div class="section-head"><div><h2>我的题库</h2><p>导入标准 JSON 题集，按原题顺序开始学习。</p></div><button class="primary" :disabled="store.busy" @click="choose">导入 JSON 题集</button></div>
         <article v-if="preview" class="panel"><h3>导入预览：{{ preview.set.title }}</h3><p>{{ preview.set.description }} · {{ preview.questions.length }} 题</p><p>ID：{{ preview.set.id }} · {{ preview.status === 'ready' ? '可导入' : preview.status === 'duplicate' ? '重复题集' : '存在冲突' }}</p><ul v-if="preview.messages.length"><li v-for="message in preview.messages" :key="message">{{ message }}</li></ul><details><summary>查看题目内容（不显示答案）</summary><ol><li v-for="q in preview.questions" :key="q.id">{{ q.question }} <span class="muted">Domain {{ q.domain }} / {{ q.type }}</span></li></ol></details><div class="actions"><button class="primary" :disabled="store.busy || preview.status !== 'ready'" @click="importSet">确认导入全部题目</button><button @click="preview = null">取消</button></div></article>
-        <p v-if="!store.sets.length" class="empty">还没有题集。点击“导入 JSON 题集”，选择随包提供的 demo-questions.json 开始。</p>
-        <div class="grid"><article v-for="s in store.sets" :key="s.id" class="panel"><span class="badge">{{ s.count }} 题</span><h3>{{ s.title }}</h3><p>{{ s.description || '暂无简介' }}</p><div class="actions"><button class="primary" :disabled="store.busy" @click="start(s.id)">开始学习</button><button :disabled="store.busy" @click="start(s.id, 'exam')">开始考试</button><button :disabled="store.busy" @click="viewSet(s.id)">查看题目</button></div></article></div>
+        <div class="actions" aria-label="题库范围">
+          <button :class="{active: !showArchived}" :aria-pressed="!showArchived" @click="showArchived = false; browsing = []">日常题库</button>
+          <button :class="{active: showArchived}" :aria-pressed="showArchived" @click="showArchived = true; browsing = []">已归档</button>
+        </div>
+        <p v-if="showArchived" class="muted">归档仅隐藏日常题库入口，已有会话可继续，错题、收藏和统计保持不变。恢复显示后可开始整套练习。</p>
+        <p v-if="!visibleSets.length" class="empty">{{ showArchived ? '暂无已归档题集。' : '暂无日常题集。可导入 JSON，或从“已归档”恢复显示。' }}</p>
+        <div class="grid">
+          <article v-for="s in visibleSets" :key="s.id" class="panel">
+            <span class="badge">{{ s.count }} 题{{ s.archived ? ' · 已归档' : '' }}</span>
+            <h3>{{ s.title }}</h3><p>{{ s.description || '暂无简介' }}</p>
+            <div class="actions">
+              <button v-if="!s.archived" class="primary" :disabled="store.busy" @click="start(s.id)">开始学习</button>
+              <button v-if="!s.archived" :disabled="store.busy" @click="start(s.id, 'exam')">开始考试</button>
+              <button :disabled="store.busy" @click="viewSet(s.id)">查看题目</button>
+              <button v-if="s.archived" :disabled="store.busy" @click="archiveSet(s.id, false)">恢复显示</button>
+              <button v-else-if="s.hasHistory" :disabled="store.busy" @click="archiveSet(s.id, true)">归档题集</button>
+              <button v-if="!s.hasHistory" :disabled="store.busy" @click="askDelete(s)">删除题集…</button>
+            </div>
+            <p class="muted">{{ s.hasHistory ? '已有练习记录，保留历史，仅可归档。' : '尚无练习记录，可确认删除。' }}</p>
+          </article>
+        </div>
         <article v-if="browsing.length" class="panel"><div class="section-head"><h3>题目一览</h3><button @click="browsing = []">收起</button></div><ol><li v-for="q in browsing" :key="q.id"><p>{{ q.question }}</p><p class="muted">{{ q.id }} · Domain {{ q.domain }} · {{ q.type }} · {{ q.difficulty }}</p></li></ol></article>
       </section>
       <section v-if="page === 'history'"><h2>练习记录</h2><p>未完成练习会自动保存，重新启动后可继续。</p><p v-if="!store.sessions.length" class="empty">尚无练习记录。从题库开始一次学习吧。</p><div class="table-wrap" v-else><table><thead><tr><th>题集</th><th>开始时间</th><th>状态</th><th>进度 / 结果</th><th>操作</th></tr></thead><tbody><tr v-for="s in store.sessions" :key="s.id"><td>{{ s.title }}<br><span class="muted">{{ s.mode === 'exam' ? '考试' : '学习' }}</span></td><td>{{ date(s.startedAt) }}</td><td>{{ s.status === 'completed' ? '已完成' : '进行中' }}</td><td>{{ s.status === 'completed' ? '正确 ' + s.correct + ' / ' + s.total : '已提交 ' + s.scored + ' / ' + s.total }}</td><td><button :disabled="store.busy" @click="resume(s.id)">{{ s.status === 'completed' ? '查看结果' : '继续' }}</button></td></tr></tbody></table></div></section>

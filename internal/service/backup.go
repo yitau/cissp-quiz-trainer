@@ -113,9 +113,12 @@ func (t *Trainer) Restore(ctx context.Context, path, safetyDir string) (string, 
 		return "", err
 	}
 	defer os.RemoveAll(dir)
-	snapshot, config, err := unpack(path, dir)
+	snapshot, config, version, err := unpack(path, dir)
 	if err != nil {
 		return "", fmt.Errorf("备份无效，原数据未修改：%w", err)
+	}
+	if err := t.repo.PrepareSnapshot(ctx, snapshot, version); err != nil {
+		return "", fmt.Errorf("备份版本检查或升级失败，原数据未修改：%w", err)
 	}
 	contents, err := t.repo.InspectSnapshot(ctx, snapshot)
 	if err != nil {
@@ -141,65 +144,66 @@ func (t *Trainer) Restore(ctx context.Context, path, safetyDir string) (string, 
 	t.token = ""
 	return safety, nil
 }
-func unpack(path, dir string) (string, map[string]string, error) {
+func unpack(path, dir string) (string, map[string]string, int, error) {
 	r, err := zip.OpenReader(path)
 	if err != nil {
-		return "", nil, err
+		return "", nil, 0, err
 	}
 	defer r.Close()
 	entries := map[string][]byte{}
 	if len(r.File) != 3 {
-		return "", nil, fmt.Errorf("完整备份必须仅包含 metadata.json、config.json、cissp.db")
+		return "", nil, 0, fmt.Errorf("完整备份必须仅包含 metadata.json、config.json、cissp.db")
 	}
 	for _, f := range r.File {
 		limit := int64(1 << 20)
 		if f.Name == "cissp.db" {
 			limit = maxBackupBytes
 		} else if f.Name != "metadata.json" && f.Name != "config.json" {
-			return "", nil, fmt.Errorf("备份包含未知路径：%s", f.Name)
+			return "", nil, 0, fmt.Errorf("备份包含未知路径：%s", f.Name)
 		}
 		if _, exists := entries[f.Name]; exists {
-			return "", nil, fmt.Errorf("重复备份条目")
+			return "", nil, 0, fmt.Errorf("重复备份条目")
 		}
 		if f.UncompressedSize64 > uint64(limit) {
-			return "", nil, fmt.Errorf("备份条目过大")
+			return "", nil, 0, fmt.Errorf("备份条目过大")
 		}
 		input, err := f.Open()
 		if err != nil {
-			return "", nil, err
+			return "", nil, 0, err
 		}
 		data, err := io.ReadAll(io.LimitReader(input, limit+1))
 		input.Close()
 		if err != nil {
-			return "", nil, err
+			return "", nil, 0, err
 		}
 		if int64(len(data)) > limit {
-			return "", nil, fmt.Errorf("备份条目超过限制")
+			return "", nil, 0, fmt.Errorf("备份条目超过限制")
 		}
 		entries[f.Name] = data
 	}
 	var meta domain.BackupMetadata
 	if err := json.Unmarshal(entries["metadata.json"], &meta); err != nil {
-		return "", nil, err
+		return "", nil, 0, err
 	}
-	if meta.FormatVersion != 1 || meta.DatabaseVersion != domain.DatabaseVersion || meta.AppVersion != domain.AppVersion {
-		return "", nil, fmt.Errorf("备份/App/数据库版本不兼容，要求 1 / %s / %d", domain.AppVersion, domain.DatabaseVersion)
+	compatible := (meta.DatabaseVersion == domain.DatabaseVersion && meta.AppVersion == domain.AppVersion) || (meta.DatabaseVersion == 1 && meta.AppVersion == "0.1.0")
+	if meta.FormatVersion != 1 || !compatible {
+		return "", nil, 0, fmt.Errorf("备份/App/数据库版本不兼容，要求 1 / %s / %d", domain.AppVersion, domain.DatabaseVersion)
 	}
 	if _, err := time.Parse(time.RFC3339Nano, meta.CreatedAt); err != nil {
-		return "", nil, fmt.Errorf("备份时间无效")
+		return "", nil, 0, fmt.Errorf("备份时间无效")
 	}
 	if digest(entries["cissp.db"]) != meta.DatabaseSHA256 || digest(entries["config.json"]) != meta.ConfigSHA256 {
-		return "", nil, fmt.Errorf("备份校验和不匹配")
+		return "", nil, 0, fmt.Errorf("备份校验和不匹配")
 	}
 	var config map[string]string
 	if err := json.Unmarshal(entries["config.json"], &config); err != nil {
-		return "", nil, err
+		return "", nil, 0, err
 	}
 	snapshot := filepath.Join(dir, "cissp.db")
 	if err := os.WriteFile(snapshot, entries["cissp.db"], 0600); err != nil {
-		return "", nil, err
+		return "", nil, 0, err
 	}
-	return snapshot, config, nil
+	return snapshot, config, meta.DatabaseVersion, nil
 }
 func validateContents(c domain.BackupContents) error {
 	expected := map[string]domain.StoredQuestion{}

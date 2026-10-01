@@ -22,7 +22,10 @@ func fingerprint(q domain.Question) string {
 	}{q.Question, q.Options}))))
 }
 func (r *Store) ListSets(ctx context.Context) ([]domain.SetSummary, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT s.id,s.title,s.description,count(q.id) FROM question_sets s JOIN questions q ON q.set_id=s.id GROUP BY s.id ORDER BY s.imported_at DESC,s.id`)
+	rows, err := r.DB.QueryContext(ctx, `SELECT s.id,s.title,s.description,count(q.id),
+ EXISTS(SELECT 1 FROM question_set_archives ar WHERE ar.set_id=s.id),
+ EXISTS(SELECT 1 FROM quiz_answers a JOIN questions used ON used.id=a.question_id WHERE used.set_id=s.id)
+ FROM question_sets s JOIN questions q ON q.set_id=s.id GROUP BY s.id ORDER BY s.imported_at DESC,s.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +33,7 @@ func (r *Store) ListSets(ctx context.Context) ([]domain.SetSummary, error) {
 	out := []domain.SetSummary{}
 	for rows.Next() {
 		var s domain.SetSummary
-		if err := rows.Scan(&s.ID, &s.Title, &s.Description, &s.Count); err != nil {
+		if err := rows.Scan(&s.ID, &s.Title, &s.Description, &s.Count, &s.Archived, &s.HasHistory); err != nil {
 			return nil, err
 		}
 		out = append(out, s)

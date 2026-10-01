@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/yitau/cissp-quiz-trainer/internal/database"
 	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 )
 
@@ -27,7 +28,10 @@ func readOnly(path string) string {
 	return u.String() + "?mode=ro"
 }
 func schema(ctx context.Context, db *sql.DB) (string, error) {
-	rows, err := db.QueryContext(ctx, "SELECT type,name,coalesce(sql,'') FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")
+	return schemaForVersion(ctx, db, domain.DatabaseVersion)
+}
+func schemaForVersion(ctx context.Context, db *sql.DB, version int) (string, error) {
+	rows, err := db.QueryContext(ctx, "SELECT type,name,coalesce(sql,'') FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND (? <> 1 OR name <> 'question_set_archives') ORDER BY type,name", version)
 	if err != nil {
 		return "", err
 	}
@@ -38,9 +42,46 @@ func schema(ctx context.Context, db *sql.DB) (string, error) {
 		if err := rows.Scan(&kind, &name, &query); err != nil {
 			return "", err
 		}
-		fmt.Fprintf(&b, "%s|%s|%s\n", kind, name, query)
+		fmt.Fprintf(&b, "%s|%s|%s\n", kind, name, strings.ReplaceAll(query, "\r\n", "\n"))
 	}
 	return b.String(), rows.Err()
+}
+
+func (r *Store) PrepareSnapshot(ctx context.Context, path string, expectedVersion int) error {
+	db, err := sql.Open("sqlite", readOnly(path))
+	if err != nil {
+		return err
+	}
+	var version int
+	err = db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version)
+	if err != nil {
+		db.Close()
+		return err
+	}
+	if version != expectedVersion {
+		db.Close()
+		return fmt.Errorf("备份元数据与实际数据库版本不一致")
+	}
+	actual, err := schema(ctx, db)
+	db.Close()
+	if err != nil {
+		return err
+	}
+	expected, err := schemaForVersion(ctx, r.DB, version)
+	if err != nil {
+		return err
+	}
+	if actual != expected {
+		return fmt.Errorf("备份数据库结构与版本不匹配")
+	}
+	if version == 1 {
+		migrated, err := database.Open(path)
+		if err != nil {
+			return fmt.Errorf("升级备份临时副本：%w", err)
+		}
+		return migrated.Close()
+	}
+	return nil
 }
 func (r *Store) InspectSnapshot(ctx context.Context, path string) (domain.BackupContents, error) {
 	var out domain.BackupContents
@@ -197,12 +238,12 @@ func (r *Store) RestoreSnapshot(ctx context.Context, path string) error {
 		return err
 	}
 	defer tx.Rollback()
-	for _, table := range []string{"quiz_answers", "question_flags", "quiz_sessions", "questions", "question_sets", "app_settings"} {
+	for _, table := range []string{"quiz_answers", "question_flags", "quiz_sessions", "questions", "question_set_archives", "question_sets", "app_settings"} {
 		if _, err := tx.ExecContext(ctx, "DELETE FROM main."+table); err != nil {
 			return fmt.Errorf("恢复清理事务失败：%w", err)
 		}
 	}
-	for _, table := range []string{"question_sets", "questions", "quiz_sessions", "quiz_answers", "question_flags", "app_settings"} {
+	for _, table := range []string{"question_sets", "question_set_archives", "questions", "quiz_sessions", "quiz_answers", "question_flags", "app_settings"} {
 		if _, err := tx.ExecContext(ctx, "INSERT INTO main."+table+" SELECT * FROM restore_source."+table); err != nil {
 			return fmt.Errorf("恢复写入事务失败：%w", err)
 		}

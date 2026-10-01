@@ -27,6 +27,8 @@ type QuestionFile struct {
 	Questions     []Question  `json:"questions"`
 }
 type SetSummary struct {
+	Archived    bool   `json:"archived"`
+	HasHistory  bool   `json:"hasHistory"`
 	ID          string `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
