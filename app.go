@@ -123,3 +123,9 @@ func (a *App) ListSessions() ([]domain.SessionSummary, error) {
 	}
 	return a.trainer.ListSessions(a.ctx)
 }
+func (a *App) SaveChoice(id, qid, selected string, flagged bool) (domain.Session, error) {
+	if err := a.ready(); err != nil {
+		return domain.Session{}, err
+	}
+	return a.trainer.SaveChoice(a.ctx, id, qid, selected, flagged)
+}

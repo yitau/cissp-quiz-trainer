@@ -96,7 +96,7 @@ func (t *Trainer) SetQuestions(ctx context.Context, id string) ([]domain.Questio
 func (t *Trainer) Start(ctx context.Context, setID, mode string) (domain.Session, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	if mode != "study" {
+	if mode != "study" && mode != "exam" {
 		return domain.Session{}, fmt.Errorf("不支持的练习模式")
 	}
 	sets, err := t.repo.ListSets(ctx)
@@ -201,6 +201,9 @@ func (t *Trainer) Complete(ctx context.Context, id string) (domain.Session, erro
 	}
 	for i := range s.Items {
 		if !s.Items[i].Scored {
+			if s.Mode == "study" {
+				s.Items[i].Selected = ""
+			}
 			score(&s.Items[i])
 		}
 	}
@@ -210,6 +213,38 @@ func (t *Trainer) Complete(ctx context.Context, id string) (domain.Session, erro
 		return domain.Session{}, fmt.Errorf("交卷失败，请重试：%w", err)
 	}
 	return visible(s), nil
+}
+
+// SaveChoice persists drafts without grading, including study choices not yet submitted.
+func (t *Trainer) SaveChoice(ctx context.Context, id, questionID, selected string, flagged bool) (domain.Session, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if selected != "" && selected != "A" && selected != "B" && selected != "C" && selected != "D" {
+		return domain.Session{}, fmt.Errorf("答案必须为 A/B/C/D 或留空")
+	}
+	s, err := t.repo.Session(ctx, id)
+	if err != nil {
+		return domain.Session{}, err
+	}
+	if s.Status != "active" {
+		return domain.Session{}, fmt.Errorf("会话已完成，不能修改")
+	}
+	for n := range s.Items {
+		i := &s.Items[n]
+		if i.Question.ID != questionID {
+			continue
+		}
+		if i.Scored {
+			return domain.Session{}, fmt.Errorf("本题已提交，不能修改")
+		}
+		i.Selected = selected
+		i.Flagged = flagged
+		if err := t.repo.SaveItem(ctx, id, *i); err != nil {
+			return domain.Session{}, err
+		}
+		return visible(s), nil
+	}
+	return domain.Session{}, fmt.Errorf("题目不属于当前会话")
 }
 func (t *Trainer) ListSessions(ctx context.Context) ([]domain.SessionSummary, error) {
 	t.mu.Lock()

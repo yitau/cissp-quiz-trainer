@@ -186,7 +186,7 @@ func (r *Store) Complete(ctx context.Context, s domain.Session) error {
 		return fmt.Errorf("会话状态已变更，请刷新")
 	}
 	for _, i := range s.Items {
-		if _, err = tx.ExecContext(ctx, "UPDATE quiz_answers SET scored=1,correct=?,scored_at=? WHERE session_id=? AND question_id=? AND scored=0", i.Correct, i.ScoredAt, s.ID, i.Question.ID); err != nil {
+		if _, err = tx.ExecContext(ctx, "UPDATE quiz_answers SET selected=?,scored=1,correct=?,scored_at=? WHERE session_id=? AND question_id=? AND scored=0", i.Selected, i.Correct, i.ScoredAt, s.ID, i.Question.ID); err != nil {
 			return err
 		}
 	}
