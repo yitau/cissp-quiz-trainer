@@ -4,8 +4,8 @@ A local-first Windows 11 CISSP practice, review, and learning analytics desktop 
 
 ## Technical baseline
 
-- Go 1.27.x toolchain
-- Wails v2.15.x
+- Go 1.27.x toolchain for development, CI, and release builds
+- Wails v2 (current dependency and CLI: v2.15.0)
 - Vue 3
 - TypeScript
 - Pinia
@@ -23,11 +23,17 @@ The repository contains the initial Wails + Vue + TypeScript scaffold. Product f
 
 ## Development prerequisites
 
-- Go 1.27.x
-- Node.js 22.x
-- npm
-- Wails CLI v2.15.x
+- Go 1.27.x toolchain
+- Node.js 22.x as the development and CI baseline; other maintained releases require compatibility validation with this project
+- npm (no project-specific version is currently pinned)
+- Wails CLI v2.15.0, matching the current dependency in `go.mod` and the CI installation command
 - WebView2 on Windows
+
+### Version declarations
+
+The Go versions describe different requirements: `go.mod` currently declares `go 1.23.0`, the module's declared minimum Go version and language semantics baseline, while the project selects Go 1.27.x as its development, CI, and release toolchain. The `go` directive does not pin the build toolchain to 1.23.0; see the [Go module reference](https://go.dev/doc/modules/gomod-ref#go). This declaration alone does not establish that the full dependency graph builds with Go 1.23.0.
+
+The current CI configuration selects Go `1.27.x`, Node.js `22`, and Wails CLI `v2.15.0`. These are configured versions, not evidence of a successful build. Node.js 24 or another maintained release is a local alternative only after the required project checks pass; installation alone does not establish compatibility. Frontend dependency ranges are declared in `frontend/package.json`.
 
 Install Wails:
 
