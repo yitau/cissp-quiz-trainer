@@ -25,6 +25,7 @@ dist/
 *.sqlite3
 /backups/
 /logs/
+*.log
 
 # Environment / secrets
 .env

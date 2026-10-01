@@ -1,85 +1,63 @@
 # CISSP Quiz Trainer
 
-A local-first Windows 11 CISSP practice, review, and learning analytics desktop application.
+Windows 11 x64 本地 CISSP 学习工具：JSON 导入 → 学习/考试 → 解析 → 错题/收藏 → 统计 → 完整备份恢复。
 
-## Technical baseline
+## 使用
 
-- Go 1.27.x toolchain for development, CI, and release builds
-- Wails v2 (current dependency and CLI: v2.15.0)
-- Vue 3
-- TypeScript
-- Pinia
-- SQLite
-- GitHub Actions
+本地构建产物在 `build/bin/CISSPQuizTrainer.exe` 和 `build/bin/CISSPQuizTrainer-win-x64.zip`。解压 ZIP，双击 EXE，在“题库与导入”选择同目录 `demo-questions.json`，确认导入即可练习。演示题为原创功能样例，不是官方真题。
 
-## Documentation
+- [中文使用说明与人工验收](docs/user-guide.md)
+- [实施计划及业务规则](docs/implementation-plan.md)
+- [执行记录与验证证据](docs/implementation-progress.md)
+- [需求基线 v0.3](docs/requirements-v0.3.md)
+- [开发约束](AGENTS.md)
 
-- [Requirements v0.3](docs/requirements-v0.3.md)
-- [Codex / contributor instructions](AGENTS.md)
+默认数据目录 `%LOCALAPPDATA%\CISSPQuizTrainer\data`，不写入 EXE 目录；通过 `CISSP_QUIZ_DATA_DIR` 可指定隔离目录。完全离线、无账号、无遥测。最终用户只需要 Windows 11 x64 和 WebView2 Runtime。
 
-## Repository status
+## 开发环境
 
-The repository contains the initial Wails + Vue + TypeScript scaffold. Product feature implementation has intentionally not started yet.
-
-## Development prerequisites
-
-- Go 1.27.x toolchain
-- Node.js 22.x as the development and CI baseline; other maintained releases require compatibility validation with this project
-- npm (no project-specific version is currently pinned)
-- Wails CLI v2.15.0, matching the current dependency in `go.mod` and the CI installation command
-- WebView2 on Windows
+Go 1.27.x、Wails CLI v2.15.0、Node.js 22.x 基线、npm、WebView2。前端 Vue 3 + TypeScript + Pinia，数据库为 database/sql + modernc.org/sqlite（纯 Go）。
 
 ### Version declarations
 
-The Go versions describe different requirements: `go.mod` currently declares `go 1.25.0`, the module's declared minimum Go version and language semantics baseline, while the project selects Go 1.27.x as its development, CI, and release toolchain. The `go` directive does not pin the build toolchain to 1.25.0; see the [Go module reference](https://go.dev/doc/modules/gomod-ref#go). This declaration alone does not establish that the full dependency graph builds with Go 1.25.0.
+`go.mod` 声明 `go 1.25.0`，与实际 Wails v2.15.0 依赖最低版本一致；这是模块最低语言/工具要求，开发和 CI 仍选择 Go 1.27.x。初始骨架的 `go 1.23.0` 在解析实际依赖后由 Go 工具纠正，不能据此声称整个依赖图兼容 Go 1.23。
 
-The current CI configuration selects Go `1.27.x`, Node.js `22`, and Wails CLI `v2.15.0`. These are configured versions, not evidence of a successful build. Node.js 24 or another maintained release is a local alternative only after the required project checks pass; installation alone does not establish compatibility. Frontend dependency ranges are declared in `frontend/package.json`.
+本机实际验证 Go 1.27.1、Wails 2.15.0、Node 24.18.0 / npm 12.0.1；Node 22 是 CI 配置基线，本次未在本机验证 Node 22 或运行远程 CI。
 
-Install Wails:
+### 干净检出首次构建
 
-```bash
+```powershell
 go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
+go mod download
+npm --prefix frontend ci
+wails build -clean
 ```
 
-Install frontend dependencies:
+首次必须先通过 Wails 建立嵌入目录、生成 `frontend/wailsjs` 并编译前端。直接从没有 bindings 的检出执行前端类型检查会失败；无需也不得手工生成替代 bindings。
 
-```bash
-cd frontend
-npm install
-cd ..
-```
+普通开发运行 `wails dev`。后续修改的必需检查：
 
-Run locally:
-
-```bash
-wails dev
-```
-
-Validate a change:
-
-```bash
-cd frontend
-npm run type-check
-npm run build
-cd ..
+```powershell
+# 若更改 Go 绑定表面，先 wails build -clean 更新生成文件。
+npm --prefix frontend run type-check
+npm --prefix frontend run build
 gofmt -w .
 go vet ./...
 go test ./...
 wails build -clean
+./scripts/package.ps1
 ```
 
-## Architecture
+Go 不在 PATH 时先检查已有的 `%LOCALAPPDATA%\Programs\go\bin` 和 `%USERPROFILE%\go\bin`，不要重复安装。本机沙箱对工具目录和 esbuild 上级路径有限制，受影响命令需在有相应权限的终端运行。
 
-```text
-Vue / TypeScript
-      ↓
-Wails binding
-      ↓
-Go service layer
-      ↓
-Repository interfaces
-      ↓
-SQLite
-```
+## 实现与数据规则
 
-See `AGENTS.md` for coding boundaries and `docs/requirements-v0.3.md` for the product baseline.
+Vue → frontend services → Wails 薄适配器 → service → repository 接口 → SQLite。SQL 只在 repository/database；migration 管理数据库版本。题目不可变 JSON 与独立会话/答案表分开保存；导入和交卷事务写入；恢复先验证并安全备份，再事务替换。
+
+学习提交后显示解析，考试交卷前服务端不返回解答；草稿即时保存、重启可继续，重复提交幂等。累计题次只包含已计分记录（含漏答），正确率显示样本量。错题历史在掌握后仍保留。
+
+v0.1 不实现编辑/删除/合并、Markdown/文本导入、高级组卷、复杂诊断、账号/云/AI/付费或自动更新。应用不进行网络访问；开发依赖下载不属于运行期功能。
+
+## 发布边界
+
+`./scripts/package.ps1` 只在本地产出包含 EXE、演示 JSON、中文说明的 ZIP 及 SHA-256 清单。构建产物、bindings、数据库、日志和本地备份均不提交。CI 构建 artifact，不自动发布 GitHub Release。本次无推送、合并、标签或远程发布。

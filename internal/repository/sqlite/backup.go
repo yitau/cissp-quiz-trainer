@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 	"net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 )
 
 func (r *Store) Snapshot(ctx context.Context, path string) error {

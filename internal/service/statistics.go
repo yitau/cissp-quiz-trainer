@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 )
 
 func statistics(attempts []domain.Attempt) domain.Statistics {
@@ -46,6 +47,8 @@ func addMetric(m *domain.Metric, a domain.Attempt) {
 	m.Count++
 	if a.Correct {
 		m.Correct++
+	} else {
+		m.Wrong++
 	}
 	if a.Selected == "" {
 		m.Unanswered++

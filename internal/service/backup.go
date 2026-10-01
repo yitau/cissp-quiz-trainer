@@ -7,13 +7,14 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/yitau/cissp-quiz-trainer/internal/domain"
-	"github.com/yitau/cissp-quiz-trainer/internal/importer"
 	"io"
 	"os"
 	"path/filepath"
 	"reflect"
 	"time"
+
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
+	"github.com/yitau/cissp-quiz-trainer/internal/importer"
 )
 
 const maxBackupBytes = 256 << 20

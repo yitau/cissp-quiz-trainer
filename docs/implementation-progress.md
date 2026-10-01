@@ -1,6 +1,6 @@
 # v0.1 执行记录
 
-时区：Asia/Shanghai（UTC+08:00）。目标状态：进行中。当前阶段：5。
+时区：Asia/Shanghai（UTC+08:00）。目标状态：本地开发交付及可执行范围验收完成；原生 UI 操作验收待人工。当前阶段：5（已完成交付，验收边界见下）。
 
 | 阶段 | 状态 | 关联提交 |
 | --- | --- | --- |
@@ -8,8 +8,8 @@
 | 1 导入与学习 | 已完成 | 24881f6 |
 | 2 考试与历史 | 已完成 | ca47ef9 |
 | 3 复习与统计 | 已完成 | bfc64a5 |
-| 4 备份与日常使用 | 已完成 | 本阶段提交见下次记录 |
-| 5 最终验收与交付 | 进行中 | — |
+| 4 备份与日常使用 | 已完成 | 8bd2d1a |
+| 5 最终验收与交付 | 已完成 | 待补入本阶段提交号 |
 
 ## 阶段 0 — 基线与业务规则
 
@@ -59,3 +59,19 @@
 - `go test ./internal/service -run 'TestFullWorkflowBackupRestore|TestInvalidBackup|TestRestoreTransaction' -count=1 -v` 通过。覆盖真实数据库完整闭环、恢复后重启、安全备份可回退、已有备份不覆盖、损坏 ZIP、格式/数据库版本、校验和/路径/配置/评分篡改、损坏 SQLite、安全备份创建失败、写入中途事务失败回滚。
 - 随后 gofmt、全量 go test、go vet、Wails Windows build、前端 type-check/build 全通过。全部使用隔离目录，没有访问真实学习库。原生文件对话框、关闭保护的窗口行为待人工验证。
 - 下一步阶段 5：自查、修正干净检出构建顺序、最终全套验收、实际 EXE 启动检查、ZIP 与使用/人工验收说明。
+
+## 阶段 5 — 最终验收与交付
+
+- 2026-10-01 17:08 +08:00：自查修正干净检出构建顺序。CI 改为 npm ci → Wails 生成 bindings/构建 → 独立前端和 Go 检查 → 本地打包；没有添加远程发布。同步 README/AGENTS 的首次构建说明。
+- 阅读实际 Wails v2.15.0 Windows dialog.go 发现 MessageDialog 忽略自定义中文按钮且返回 Yes/No；修正恢复确认比较及默认 No，避免无法确认恢复。增加 App 层本地错误日志、友好数据库错误和适配器重启测试。
+- 移除已核对路径的生成目录 frontend/dist、frontend/wailsjs 后执行 `npm --prefix frontend ci`、`wails build -clean`、前端 type-check/build、`go vet ./...`、`go test ./... -count=1 -v`、gofmt 检查，全部通过。未手工伪造 bindings。
+- `go test ./... -count=1 -json` 保存于忽略的 tmp/final-tests.jsonl：10 个顶层测试 + 17 个子用例通过，失败 0。完整使用流程测试覆盖导入→学习错误及解析→收藏→考试→统计→重启→备份→新数据库恢复核对→安全备份回退。
+- 2026-10-01 18:36 +08:00：实际 EXE 在 `tmp/ui-source` 隔离目录启动，生成 65536 字节 cissp.db、空 app.log；Windows Computer Use 的 list_windows 返回 CISSP Quiz Trainer 窗口。首次隐藏启动没有可操作窗口，重启为可见窗口后找到；get_window/get_window_state 在应用访问审批步骤报 `Computer Use app approval timed out`，没有获得截图、没有执行 UI 点击或输入。未访问默认学习数据目录；测试进程已清理。
+- 验证边界：Go 单元/SQLite 集成、App 适配器重启、Windows 构建与进程/窗口创建成功；原生界面渲染、文件对话框、实际按钮流程、缩放/键盘及关闭保护未验收，不宣称全部端到端通过。按用户允许的工具限制路径保留 docs/user-guide.md 人工步骤。
+- `scripts/package.ps1` 已产出 EXE/ZIP/checksums。读取 PE 头确认为 0x8664（x64）；检查 ZIP 恰有 EXE、demo-questions.json、使用说明.md，无数据库或私有数据。
+- 自查补充单次结果的显式错误数量和损坏原库时在新数据目录恢复的说明；正在进行受影响的最终重建与重新打包，完成后保存本地提交。
+- 2026-10-01 18:39:02 +08:00（Asia/Shanghai）：结果错误数补充后的最终 gofmt 检查、go vet、go test -count=1、Wails Windows 构建、独立前端 type-check/build 全通过；重新生成正式 bindings 与 EXE/ZIP。最终测试结果仍为 10 个顶层 + 17 个子用例、失败 0。
+- 最终 EXE 再以 tmp/final-startup 隔离启动：进程存活、数据库初始化成功、错误日志为空，检查后清理进程。原生窗口操作审批超时未解决，仍作为人工验收限制保留，不宣称全部 E2E 通过。
+- 本地交付：build/bin/CISSPQuizTrainer.exe（16,053,248 字节）、build/bin/CISSPQuizTrainer-win-x64.zip（6,758,247 字节）。SHA-256 见 build/bin/checksums.txt；EXE = 8ecee0c89b4c1b0c78024711af4d097314403498d4548ac17898c0cf211f8f32；ZIP = e98bfc196c44f17a5a060d48ae8200f9439837a8e04557e0f2e2e7103fd290cf。
+- 自查：未新增运行期网络、账号或复杂框架；SQL/服务/绑定边界保留；无真实数据验证；git diff --check 通过；未跟踪 EXE、数据库、生成 bindings/dist、node_modules。没有推送、合并、打标签或发布。
+- 已知限制：原生文件对话框/按钮全流程/显示缩放与键盘/关闭保护待人工；Node 22 与远程 GitHub Actions 未实际运行；发行文件未签名；仅支持同 App/数据库/备份版本恢复，损坏原库须保留原目录并用新的空数据目录恢复。下一步是按 user-guide.md 人工验收步骤核验原生界面，无未实现的本次业务功能。

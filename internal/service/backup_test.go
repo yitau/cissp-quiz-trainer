@@ -7,15 +7,16 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/yitau/cissp-quiz-trainer/internal/database"
-	"github.com/yitau/cissp-quiz-trainer/internal/domain"
-	"github.com/yitau/cissp-quiz-trainer/internal/repository/sqlite"
-	"github.com/yitau/cissp-quiz-trainer/internal/service"
 	"io"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/yitau/cissp-quiz-trainer/internal/database"
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
+	"github.com/yitau/cissp-quiz-trainer/internal/repository/sqlite"
+	"github.com/yitau/cissp-quiz-trainer/internal/service"
 )
 
 func TestFullWorkflowBackupRestore(t *testing.T) {

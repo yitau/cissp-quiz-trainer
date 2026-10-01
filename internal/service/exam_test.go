@@ -2,11 +2,12 @@ package service_test
 
 import (
 	"context"
+	"sync"
+	"testing"
+
 	"github.com/yitau/cissp-quiz-trainer/internal/database"
 	"github.com/yitau/cissp-quiz-trainer/internal/repository/sqlite"
 	"github.com/yitau/cissp-quiz-trainer/internal/service"
-	"sync"
-	"testing"
 )
 
 func TestExamRestartAndIdempotency(t *testing.T) {

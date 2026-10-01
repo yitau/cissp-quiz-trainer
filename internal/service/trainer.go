@@ -5,13 +5,14 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
-	"github.com/yitau/cissp-quiz-trainer/internal/domain"
-	"github.com/yitau/cissp-quiz-trainer/internal/importer"
-	"github.com/yitau/cissp-quiz-trainer/internal/repository"
 	"io"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
+	"github.com/yitau/cissp-quiz-trainer/internal/importer"
+	"github.com/yitau/cissp-quiz-trainer/internal/repository"
 )
 
 type Trainer struct {

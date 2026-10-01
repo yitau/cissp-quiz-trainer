@@ -12,6 +12,7 @@ type Metric struct {
 	Label      string   `json:"label"`
 	Count      int      `json:"count"`
 	Correct    int      `json:"correct"`
+	Wrong      int      `json:"wrong"`
 	Unanswered int      `json:"unanswered"`
 	Rate       *float64 `json:"rate"`
 }

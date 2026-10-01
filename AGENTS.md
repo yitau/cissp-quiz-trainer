@@ -119,6 +119,10 @@ Fresh checkout:
 go mod download
 cd frontend
 npm install
+cd ..
+wails build -clean
+cd frontend
+npm run type-check
 npm run build
 cd ..
 go vet ./...
@@ -137,7 +141,7 @@ Production smoke build:
 wails build -clean
 ```
 
-The frontend must be built before commands that compile the root Wails package on a completely fresh checkout because `main.go` embeds `frontend/dist`.
+On a completely fresh checkout, run `wails build -clean` first: Wails creates the embed directory, generates bindings, and builds the frontend/application. The Vue service module imports generated bindings; a standalone frontend type-check/build requires those bindings. Commands that compile the root Go package also require `frontend/dist` because `main.go` embeds it.
 
 ## Required checks
 

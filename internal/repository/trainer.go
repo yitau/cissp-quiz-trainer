@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 )
 

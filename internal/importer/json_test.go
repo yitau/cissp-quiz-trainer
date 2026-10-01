@@ -2,10 +2,11 @@ package importer
 
 import (
 	"encoding/json"
-	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/yitau/cissp-quiz-trainer/internal/domain"
 )
 
 func TestValidation(t *testing.T) {
