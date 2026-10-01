@@ -22,7 +22,7 @@ Go 1.27.x、Wails CLI v2.15.0、Node.js 22.x 基线、npm、WebView2。前端 Vu
 
 `go.mod` 声明 `go 1.25.0`，与实际 Wails v2.15.0 依赖最低版本一致；这是模块最低语言/工具要求，开发和 CI 仍选择 Go 1.27.x。初始骨架的 `go 1.23.0` 在解析实际依赖后由 Go 工具纠正，不能据此声称整个依赖图兼容 Go 1.23。
 
-本机实际验证 Go 1.27.1、Wails 2.15.0、Node 24.18.0 / npm 12.0.1；2026-10-01 远端 Windows CI 的 Go 1.27.x、Wails 2.15.0、Node 22 全套检查和打包通过（[运行记录](https://github.com/yitau/cissp-quiz-trainer/actions/runs/36857696248)）。原生界面验收边界见执行记录。
+本机实际验证 Go 1.27.1、Wails 2.15.0、Node 24.18.0 / npm 12.0.1；2026-10-01 远端 Windows CI 的 Go 1.27.x、Wails 2.15.0、Node 22 全套检查和打包通过（[运行记录](https://github.com/yitau/cissp-quiz-trainer/actions/runs/36867447204)）。真实窗口已验证学习、续答、考试交卷、结果筛选、错题重练及恢复数据核对；原生文件对话框等验收边界见执行记录。
 
 ### 干净检出首次构建
 

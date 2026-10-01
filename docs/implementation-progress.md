@@ -1,6 +1,6 @@
 # v0.1 执行记录
 
-时区：Asia/Shanghai（UTC+08:00）。目标状态：旧窗口阻塞已解除；v0.1.2 真实答题 UI、重启续答与隔离恢复核对已验证，原生文件对话框输入受工具限制保留人工步骤。正在最终检查、提交及 CI 核验。当前阶段：7。
+时区：Asia/Shanghai（UTC+08:00）。目标状态：v0.1.2 实现及可执行验收已完成并推送，功能提交 CI 全通过；真实答题 UI、重启续答与隔离恢复已核对。原生文件对话框输入受工具限制，保留明确人工验收边界，不宣称完整原生端到端通过。当前阶段：7。
 
 | 阶段 | 状态 | 关联提交 |
 | --- | --- | --- |
@@ -11,7 +11,7 @@
 | 4 备份与日常使用 | 已完成 | 8bd2d1a |
 | 5 最终验收与交付 | 已完成 | 1190faf |
 | 6 题集删除与归档 | 已完成 | 49b21d8 |
-| 7 基础练习体验与 CI | 进行中（验收收尾） | 4bdc02b、2eade2b、34634ec |
+| 7 基础练习体验与 CI | 已完成（文件对话框等人工项见下） | 4bdc02b、2eade2b、34634ec、60ce73b |
 
 ## 阶段 7 — 基础练习体验与 CI
 
@@ -157,3 +157,13 @@
 - 正常关闭测试窗口后，正式 Backup/Restore 服务把上述 UI 真实产生的数据备份为 tmp/iteration7-ui-backup.zip，恢复至全新 tmp/iteration7-ui-restored；所有会话逐项与统计 DeepEqual 通过，证据 tmp/iteration7-ui-restore-evidence.json。重启恢复目录的真实 UI 再核对 5/2/40%/漏答2/错题3/收藏1，以及界面显示的隔离路径，全部一致。恢复后的测试窗口已正常关闭。
 - 验收边界：原生练习核心流程已实操通过；文件选择器输入/导入确认/保存备份和恢复确认流程因工具控件映射问题未完成，保留 user-guide 人工步骤。125%/150% 系统缩放、完整 Tab/单选方向键、文件操作时关闭保护仍未实测；后端相应数据安全失败路径已有测试，不将其称为 UI 验收。
 - 下一步：最终 Go 必需检查、EXE/ZIP 重打包、提交布局修正及全部记录、推送并确认最终 HEAD 的 Actions 全部通过。
+
+### 阶段 7 最终交付收据（2026-10-01 21:21:20 +08:00，Asia/Shanghai）
+
+- 阶段已完成，按用户允许的工具受限路径如实保留人工项：未宣称原生文件对话框全流程、系统缩放及完整键盘验收已通过；相关步骤见 user-guide。其余本轮四项体验迭代均有单元/集成和真实原生窗口证据。
+- 最终本地 gofmt -w . / gofmt -l .、go vet ./...、go test ./... -count=1 -json 通过，tmp/iteration7-final-tests.jsonl 为 18 顶层 + 26 子用例、失败 0；前端 type-check/build、wails build -clean 已在布局修正后通过。两个隔离数据目录 app.log 为空；测试进程已正常关闭。
+- 60ce73b 已推送，Actions run 36867447204 全部 completed/success：https://github.com/yitau/cissp-quiz-trainer/actions/runs/36867447204 。本轮新增提交包含功能 4bdc02b、Windows LF 修复 2eade2b、验收记录 34634ec、真实 UI 布局修正与证据 60ce73b。
+- 正式默认 EXE：C:/Users/17361/Documents/code/cissp-quiz-trainer/build/bin/CISSPQuizTrainer.exe（16076288 字节），SHA256 b6ace4a7cdebb633abe4e251341c0a56d086971a8f3d88842fe077550742211a。
+- 正式默认 ZIP：C:/Users/17361/Documents/code/cissp-quiz-trainer/build/bin/CISSPQuizTrainer-win-x64.zip（6768643 字节），SHA256 06680b9f40c69da52e25750cf85ceb435990b76fa54bfddddba14fc694318a6a。包含 EXE、原创演示题与最新中文说明，不含数据库、日志、私有题集或生成 bindings。
+- 复用分支 feature/mvp-v0.1，普通推送 origin，没有合并、标签或 Release。上述历史阻塞已解除；以前版本文件名仅为当时临时交付，本次正式交付以默认路径和本段校验值为准。
+- 本收据与 README 作为最后文档提交；推送后继续核验最后提交的 Actions，再结束持续目标，不重复执行无变化的本地业务测试。
