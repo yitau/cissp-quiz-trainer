@@ -129,3 +129,28 @@ func (a *App) SaveChoice(id, qid, selected string, flagged bool) (domain.Session
 	}
 	return a.trainer.SaveChoice(a.ctx, id, qid, selected, flagged)
 }
+
+func (a *App) Statistics() (domain.Statistics, error) {
+	if err := a.ready(); err != nil {
+		return domain.Statistics{}, err
+	}
+	return a.trainer.Statistics(a.ctx)
+}
+func (a *App) Review(kind string) ([]domain.ReviewQuestion, error) {
+	if err := a.ready(); err != nil {
+		return nil, err
+	}
+	return a.trainer.Review(a.ctx, kind)
+}
+func (a *App) SetFavorite(id string, value bool) error {
+	if err := a.ready(); err != nil {
+		return err
+	}
+	return a.trainer.SetFavorite(a.ctx, id, value)
+}
+func (a *App) StartReview(kind string) (domain.Session, error) {
+	if err := a.ready(); err != nil {
+		return domain.Session{}, err
+	}
+	return a.trainer.StartReview(a.ctx, kind)
+}

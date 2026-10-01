@@ -6,6 +6,8 @@ import (
 )
 
 type Trainer interface {
+	LearningData(context.Context) ([]domain.Question, []domain.Attempt, map[string]bool, error)
+	SetFavorite(context.Context, string, bool) error
 	ListSets(context.Context) ([]domain.SetSummary, error)
 	ImportCheck(context.Context, domain.QuestionFile) (string, []string, error)
 	Import(context.Context, domain.QuestionFile) error

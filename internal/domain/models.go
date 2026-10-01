@@ -40,13 +40,15 @@ type Preview struct {
 	Token     string      `json:"token"`
 }
 type Session struct {
-	ID          string        `json:"id"`
-	Title       string        `json:"title"`
-	Mode        string        `json:"mode"`
-	Status      string        `json:"status"`
-	StartedAt   string        `json:"startedAt"`
-	CompletedAt string        `json:"completedAt"`
-	Items       []SessionItem `json:"items"`
+	Statistics      Statistics    `json:"statistics"`
+	DurationSeconds int64         `json:"durationSeconds"`
+	ID              string        `json:"id"`
+	Title           string        `json:"title"`
+	Mode            string        `json:"mode"`
+	Status          string        `json:"status"`
+	StartedAt       string        `json:"startedAt"`
+	CompletedAt     string        `json:"completedAt"`
+	Items           []SessionItem `json:"items"`
 }
 type SessionItem struct {
 	Question Question `json:"question"`

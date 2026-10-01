@@ -6,6 +6,8 @@ export const useTrainer = defineStore('trainer', () => {
   const sets = ref<api.domain.SetSummary[]>([])
   const sessions = ref<api.domain.SessionSummary[]>([])
   const session = ref<api.domain.Session | null>(null)
+  const statistics = ref<api.domain.Statistics | null>(null)
+  const review = ref<api.domain.ReviewQuestion[]>([])
   const busy = ref(false)
   const error = ref('')
   const notice = ref('')
@@ -18,6 +20,8 @@ export const useTrainer = defineStore('trainer', () => {
   async function refresh() {
     sets.value = await api.ListSets()
     sessions.value = await api.ListSessions()
+    statistics.value = await api.Statistics()
+    review.value = await api.Review('all')
   }
-  return { sets, sessions, session, busy, error, notice, run, refresh }
+  return { sets, sessions, session, statistics, review, busy, error, notice, run, refresh }
 })
