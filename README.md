@@ -31,7 +31,7 @@ The repository contains the initial Wails + Vue + TypeScript scaffold. Product f
 
 ### Version declarations
 
-The Go versions describe different requirements: `go.mod` currently declares `go 1.23.0`, the module's declared minimum Go version and language semantics baseline, while the project selects Go 1.27.x as its development, CI, and release toolchain. The `go` directive does not pin the build toolchain to 1.23.0; see the [Go module reference](https://go.dev/doc/modules/gomod-ref#go). This declaration alone does not establish that the full dependency graph builds with Go 1.23.0.
+The Go versions describe different requirements: `go.mod` currently declares `go 1.25.0`, the module's declared minimum Go version and language semantics baseline, while the project selects Go 1.27.x as its development, CI, and release toolchain. The `go` directive does not pin the build toolchain to 1.25.0; see the [Go module reference](https://go.dev/doc/modules/gomod-ref#go). This declaration alone does not establish that the full dependency graph builds with Go 1.25.0.
 
 The current CI configuration selects Go `1.27.x`, Node.js `22`, and Wails CLI `v2.15.0`. These are configured versions, not evidence of a successful build. Node.js 24 or another maintained release is a local alternative only after the required project checks pass; installation alone does not establish compatibility. Frontend dependency ranges are declared in `frontend/package.json`.
 

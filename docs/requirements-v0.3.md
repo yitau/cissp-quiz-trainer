@@ -88,7 +88,7 @@ Wails Windows 应用使用系统 WebView2。
 
 ### 2.4 版本声明口径
 
-- `go.mod` 当前的 `go 1.23.0` 声明模块所需的最低 Go 版本，并决定模块的语言语义基线；它不表示构建工具链固定为 1.23.0。Go 1.27.x 是本项目选定的开发、CI 与发布构建工具链，二者含义不同。仅凭该声明不能认定完整依赖树已兼容 Go 1.23.0，具体语义参见 [Go 官方模块文档](https://go.dev/doc/modules/gomod-ref#go)。
+- `go.mod` 当前的 `go 1.25.0` 声明模块所需的最低 Go 版本，并决定模块的语言语义基线；它不表示构建工具链固定为 1.23.0。Go 1.27.x 是本项目选定的开发、CI 与发布构建工具链，二者含义不同。仅凭该声明不能认定完整依赖树已兼容 Go 1.25.0，具体语义参见 [Go 官方模块文档](https://go.dev/doc/modules/gomod-ref#go)。
 - 当前 CI 配置选择 Go `1.27.x`、Node.js `22`、Wails CLI `v2.15.0`。配置中声明这些版本，不代表已经通过构建验证。
 - 本机安装 Node.js 24 或其他受维护版本，不等于已验证项目兼容性；需通过项目要求的检查后才能确认。前端依赖版本范围以 `frontend/package.json` 为准。
 
@@ -1326,7 +1326,7 @@ v0.1 面向个人日常使用，包含：
 截至 v0.3，正式确认：
 
 ```text
-Language        Go (go.mod declared minimum: 1.23.0)
+Language        Go (go.mod declared minimum: 1.25.0)
 Go Toolchain    1.27.x (development / CI / release)
 Desktop         Wails v2 (dependency / CLI: v2.15.0)
 Node.js         22.x (development / CI baseline)

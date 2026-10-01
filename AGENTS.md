@@ -10,7 +10,7 @@ The product and architecture baseline is documented in `docs/requirements-v0.3.m
 
 ## Technical baseline
 
-- Go toolchain: **1.27.x** for development, CI, and release builds. The `go 1.23.0` directive in `go.mod` is the module's declared minimum Go version and language semantics baseline, not the selected build toolchain. It does not by itself establish full dependency compatibility with Go 1.23.0.
+- Go toolchain: **1.27.x** for development, CI, and release builds. The `go 1.25.0` directive in `go.mod` is the module's declared minimum Go version and language semantics baseline, not the selected build toolchain. It does not by itself establish full dependency compatibility with Go 1.25.0.
 - Desktop shell: **Wails v2**, with the current dependency and CLI at **v2.15.0**. Stay on the stable v2 line unless an explicit migration is requested.
 - Frontend: **Vue 3 + TypeScript + Vite**.
 - State management: **Pinia**.

@@ -7,6 +7,9 @@
 # Wails
 /build/bin/
 frontend/wailsjs/
+frontend/package.json.md5
+/build/appicon.png
+/build/windows/
 
 # Frontend
 frontend/node_modules/
