@@ -1,3 +1,4 @@
 export { ChooseImport, ConfirmImport, ListSets, SetQuestions, StartQuiz, GetSession, SubmitStudy, CompleteQuiz, ListSessions, DataDirectory, SaveChoice } from '../../wailsjs/go/main/App'
 export { domain } from '../../wailsjs/go/models'
 export { Statistics, Review, SetFavorite, StartReview } from '../../wailsjs/go/main/App'
+export { CreateBackup, RestoreBackup } from '../../wailsjs/go/main/App'

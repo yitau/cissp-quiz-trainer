@@ -22,7 +22,16 @@ type Trainer struct {
 }
 
 func New(repo repository.Trainer) *Trainer { return &Trainer{repo: repo} }
-func now() string                          { return time.Now().UTC().Format(time.RFC3339Nano) }
+
+// Busy prevents closing the desktop window while a database/file operation is active.
+func (t *Trainer) Busy() bool {
+	if !t.mu.TryLock() {
+		return true
+	}
+	t.mu.Unlock()
+	return false
+}
+func now() string { return time.Now().UTC().Format(time.RFC3339Nano) }
 func (t *Trainer) PreviewFile(ctx context.Context, path string) (domain.Preview, error) {
 	f, err := os.Open(path)
 	if err != nil {

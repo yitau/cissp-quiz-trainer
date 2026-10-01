@@ -11,6 +11,7 @@ import (
 	"github.com/yitau/cissp-quiz-trainer/internal/service"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // App is the thin Wails-facing application adapter.
@@ -55,6 +56,7 @@ func (a *App) shutdown(context.Context) {
 		a.db.Close()
 	}
 }
+func (a *App) beforeClose(context.Context) bool { return a.trainer != nil && a.trainer.Busy() }
 func (a *App) ready() error {
 	if a.initErr != nil {
 		return fmt.Errorf("数据库未就绪：%w", a.initErr)
@@ -153,4 +155,31 @@ func (a *App) StartReview(kind string) (domain.Session, error) {
 		return domain.Session{}, err
 	}
 	return a.trainer.StartReview(a.ctx, kind)
+}
+func (a *App) CreateBackup() (string, error) {
+	if err := a.ready(); err != nil {
+		return "", err
+	}
+	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{Title: "保存完整备份（请选择新文件名）", DefaultFilename: "cissp-backup-" + time.Now().Format("20060102-150405") + ".zip", Filters: []runtime.FileFilter{{DisplayName: "完整备份 ZIP", Pattern: "*.zip"}}})
+	if err != nil || path == "" {
+		return "", err
+	}
+	if err := a.trainer.Backup(a.ctx, path); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+func (a *App) RestoreBackup() (string, error) {
+	if err := a.ready(); err != nil {
+		return "", err
+	}
+	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{Title: "选择需要恢复的完整备份", Filters: []runtime.FileFilter{{DisplayName: "完整备份 ZIP", Pattern: "*.zip"}}})
+	if err != nil || path == "" {
+		return "", err
+	}
+	choice, err := runtime.MessageDialog(a.ctx, runtime.MessageDialogOptions{Type: runtime.QuestionDialog, Title: "确认恢复备份", Message: "恢复将替换当前全部题库、学习记录和收藏。校验通过后会先保留当前数据的安全备份。\n\n文件：" + path, Buttons: []string{"恢复", "取消"}, DefaultButton: "取消", CancelButton: "取消"})
+	if err != nil || choice != "恢复" {
+		return "", err
+	}
+	return a.trainer.Restore(a.ctx, path, filepath.Join(a.dataDir, "backups"))
 }

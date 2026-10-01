@@ -4,6 +4,7 @@ import * as api from './services/api'
 import StatisticsTable from './components/StatisticsTable.vue'
 import { useTrainer } from './stores/trainer'
 const store = useTrainer()
+const dataDir = ref('')
 const page = ref('library')
 const reviewKind = ref('wrong')
 const reviewItems = computed(() => store.review.filter(q => reviewKind.value === 'wrong' ? q.wrong > 0 : q.favorite))
@@ -29,7 +30,9 @@ function favorite(id: string, value: boolean) { store.run(async () => { await ap
 function reviewStart() { store.run(async () => { await openSession(await api.StartReview(reviewKind.value)); await store.refresh() }) }
 function viewSet(id: string) { store.run(async () => { browsing.value = await api.SetQuestions(id) }) }
 const date = (value: string) => value ? new Date(value).toLocaleString('zh-CN') : '进行中'
-onMounted(() => store.run(store.refresh))
+function backup() { store.run(async () => { const path = await api.CreateBackup(); if (path) store.notice = '备份已保存：' + path }) }
+function restore() { store.run(async () => { const safety = await api.RestoreBackup(); if (!safety) return; store.session = null; preview.value = null; browsing.value = []; await store.refresh(); store.notice = '恢复成功。恢复前的安全备份：' + safety }) }
+onMounted(() => store.run(async () => { dataDir.value = await api.DataDirectory(); await store.refresh() }))
 </script>
 <template>
   <div class="app-shell">
@@ -57,7 +60,7 @@ onMounted(() => store.run(store.refresh))
         <div v-if="store.session.status !== 'completed'" class="panel"><button v-if="!confirmFinish" :disabled="store.busy" @click="confirmFinish = true">交卷并查看结果</button><div v-else><p>还有 {{ store.session.items.length - answered }} 题未作答或未提交，交卷后将作为漏答计错。确认交卷？</p><div class="actions"><button class="primary" :disabled="store.busy" @click="finish">确认交卷</button><button @click="confirmFinish = false">继续作答</button></div></div></div>
       </section>
       <section v-if="page === 'review'"><div class="section-head"><div><h2>错题与收藏</h2><p>曾经答错的题目始终保留。连续答对 3 次显示已掌握。</p></div><button class="primary" :disabled="store.busy || !reviewItems.length" @click="reviewStart">开始此范围复习</button></div><div class="actions"><button :class="{active:reviewKind==='wrong'}" @click="reviewKind='wrong'">错题历史</button><button :class="{active:reviewKind==='favorites'}" @click="reviewKind='favorites'">收藏题</button></div><p v-if="!reviewItems.length" class="empty">此范围暂无题目。作答后错题会自动记录，也可以在答题时收藏。</p><article v-for="q in reviewItems" :key="q.question.id" class="panel"><p class="muted">Domain {{ q.question.domain }} · {{ q.question.type }}</p><h3>{{ q.question.question }}</h3><p>作答 {{ q.attempts }} 次 · 答错 {{ q.wrong }} 次 · 连续正确 {{ q.streak }} 次 · {{ q.mastered ? '已掌握（保留历史）' : '待复习' }}</p><button :disabled="store.busy" :aria-pressed="q.favorite" @click="favorite(q.question.id,!q.favorite)">{{ q.favorite ? '取消收藏' : '收藏' }}</button></article></section>
-      <section v-if="page === 'stats' && store.statistics"><h2>基础统计</h2><p>累计题次包括学习已提交题和已交卷考试，含漏答；不包含考试草稿。同题多次练习分别计数。</p><div class="result"><strong>累计 {{ store.statistics.total.count }} 题次 · 正确 {{ store.statistics.total.correct }} · 正确率 {{ store.statistics.total.rate == null ? '—' : store.statistics.total.rate.toFixed(1) + '%' }}</strong><p>漏答 {{ store.statistics.total.unanswered }} · 曾错题 {{ store.statistics.wrongQuestions }} · 收藏 {{ store.statistics.favorites }}</p></div><StatisticsTable title="按 Domain" :rows="store.statistics.domains" domains/><StatisticsTable title="按题型" :rows="store.statistics.types"/></section>
+      <section v-if="page === 'stats' && store.statistics"><h2>基础统计</h2><p>累计题次包括学习已提交题和已交卷考试，含漏答；不包含考试草稿。同题多次练习分别计数。</p><div class="result"><strong>累计 {{ store.statistics.total.count }} 题次 · 正确 {{ store.statistics.total.correct }} · 正确率 {{ store.statistics.total.rate == null ? '—' : store.statistics.total.rate.toFixed(1) + '%' }}</strong><p>漏答 {{ store.statistics.total.unanswered }} · 曾错题 {{ store.statistics.wrongQuestions }} · 收藏 {{ store.statistics.favorites }}</p></div><StatisticsTable title="按 Domain" :rows="store.statistics.domains" domains/><StatisticsTable title="按题型" :rows="store.statistics.types"/><article class="panel"><h3>完整备份与恢复</h3><p>备份包含题库、全部练习记录、收藏和应用配置。恢复会替换当前数据，校验成功后先自动保存恢复前安全备份。</p><p class="muted">数据目录：{{ dataDir }}</p><div class="actions"><button class="primary" :disabled="store.busy" @click="backup">保存完整备份</button><button :disabled="store.busy" @click="restore">从备份恢复…</button></div><p class="muted">请使用新文件名；不会覆盖已有备份。文件操作期间请勿关闭应用。</p></article></section>
     </main><footer>题集仅用于个人学习。此工具不提供官方真题或考试通过预测。</footer>
   </div>
 </template>

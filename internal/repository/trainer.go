@@ -6,6 +6,9 @@ import (
 )
 
 type Trainer interface {
+	Snapshot(context.Context, string) error
+	InspectSnapshot(context.Context, string) (domain.BackupContents, error)
+	RestoreSnapshot(context.Context, string) error
 	LearningData(context.Context) ([]domain.Question, []domain.Attempt, map[string]bool, error)
 	SetFavorite(context.Context, string, bool) error
 	ListSets(context.Context) ([]domain.SetSummary, error)
