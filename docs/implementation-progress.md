@@ -114,3 +114,10 @@
 - wails build -clean 两次因正在运行的旧版 EXE（PID 51716）无法覆盖而失败。普通沙箱 Get-Process 的空结果不能证明进程已退出；提权只读查询确认窗口仍在。已请用户关闭，未终止用户进程。
 - 改用 wails build -o CISSPQuizTrainer-v0.1.2.exe 完成实际 Windows 生产构建，生成正式 bindings。原生窗口读取返回 minimized，尚未执行新版界面操作。
 - 远端只存在 main@9fb84ed，GitHub yitau 已登录；复用当前 feature/mvp-v0.1。下一步提交推送本次功能，跟踪 Actions 干净构建，旧窗口关闭后更新默认 EXE/ZIP 并验收新窗口。
+
+### 首轮远端 CI 与修复（2026-10-01 19:48:30 +08:00，Asia/Shanghai）
+
+- 功能提交 4bdc02b 已普通推送，Actions run 36857039509：Go/Node 22 准备、依赖、Wails 干净 Windows 生产构建、前端 type-check/build 通过；Go formatting 失败，后续 vet/test/打包未执行。
+- gh run view --log-failed 显示全部 Go 文件需要格式化；原因是 Windows 默认 autocrlf 检出，没有仓库级 LF 约束。新增 .gitattributes 的 *.go text eol=lf，保留原 gofmt 检查，未关闭检查或自动格式化掩盖错误。
+- 独立本地产物 build/bin/CISSPQuizTrainer-v0.1.2.exe（16076288 字节）和 CISSPQuizTrainer-v0.1.2-win-x64.zip 已生成；ZIP 已核对只含 EXE、原创演示 JSON 和使用说明。旧版窗口仍占用默认 EXE，尚未做新版 UI 验收。
+- 下一步：提交换行修复，验证全新检出格式，继续跟踪修复后的完整 Actions。
