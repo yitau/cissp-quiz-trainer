@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/mvp-v0.1]
   pull_request:
     branches: [main]
 

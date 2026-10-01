@@ -200,6 +200,13 @@ func (a *App) StartReview(kind string) (domain.Session, error) {
 	value, err := a.trainer.StartReview(a.ctx, kind)
 	return value, a.report(err)
 }
+func (a *App) StartSessionReview(id string) (domain.Session, error) {
+	if err := a.ready(); err != nil {
+		return domain.Session{}, err
+	}
+	value, err := a.trainer.StartSessionReview(a.ctx, id)
+	return value, a.report(err)
+}
 func (a *App) CreateBackup() (string, error) {
 	if err := a.ready(); err != nil {
 		return "", err

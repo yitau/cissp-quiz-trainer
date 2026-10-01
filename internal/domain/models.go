@@ -42,6 +42,7 @@ type Preview struct {
 	Token     string      `json:"token"`
 }
 type Session struct {
+	ResumeIndex     int           `json:"resumeIndex"`
 	Statistics      Statistics    `json:"statistics"`
 	DurationSeconds int64         `json:"durationSeconds"`
 	ID              string        `json:"id"`
@@ -53,6 +54,7 @@ type Session struct {
 	Items           []SessionItem `json:"items"`
 }
 type SessionItem struct {
+	Progress string   `json:"progress"`
 	Question Question `json:"question"`
 	Selected string   `json:"selected"`
 	Flagged  bool     `json:"flagged"`
@@ -61,6 +63,7 @@ type SessionItem struct {
 	ScoredAt string   `json:"scoredAt"`
 }
 type SessionSummary struct {
+	Selected    int    `json:"selected"`
 	ID          string `json:"id"`
 	Title       string `json:"title"`
 	Mode        string `json:"mode"`

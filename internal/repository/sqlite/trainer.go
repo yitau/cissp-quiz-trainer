@@ -196,7 +196,7 @@ func (r *Store) Complete(ctx context.Context, s domain.Session) error {
 	return tx.Commit()
 }
 func (r *Store) ListSessions(ctx context.Context) ([]domain.SessionSummary, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT s.id,s.title,s.mode,s.status,s.started_at,s.completed_at,count(*),sum(a.scored),coalesce(sum(a.correct),0) FROM quiz_sessions s JOIN quiz_answers a ON a.session_id=s.id GROUP BY s.id ORDER BY s.started_at DESC,s.id`)
+	rows, err := r.DB.QueryContext(ctx, `SELECT s.id,s.title,s.mode,s.status,s.started_at,s.completed_at,count(*),sum(a.scored),coalesce(sum(a.correct),0),sum(CASE WHEN a.selected<>'' THEN 1 ELSE 0 END) FROM quiz_sessions s JOIN quiz_answers a ON a.session_id=s.id GROUP BY s.id ORDER BY s.started_at DESC,s.id`)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func (r *Store) ListSessions(ctx context.Context) ([]domain.SessionSummary, erro
 	out := []domain.SessionSummary{}
 	for rows.Next() {
 		var s domain.SessionSummary
-		if err := rows.Scan(&s.ID, &s.Title, &s.Mode, &s.Status, &s.StartedAt, &s.CompletedAt, &s.Total, &s.Scored, &s.Correct); err != nil {
+		if err := rows.Scan(&s.ID, &s.Title, &s.Mode, &s.Status, &s.StartedAt, &s.CompletedAt, &s.Total, &s.Scored, &s.Correct, &s.Selected); err != nil {
 			return nil, err
 		}
 		out = append(out, s)

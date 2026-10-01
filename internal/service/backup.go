@@ -185,7 +185,7 @@ func unpack(path, dir string) (string, map[string]string, int, error) {
 	if err := json.Unmarshal(entries["metadata.json"], &meta); err != nil {
 		return "", nil, 0, err
 	}
-	compatible := (meta.DatabaseVersion == domain.DatabaseVersion && meta.AppVersion == domain.AppVersion) || (meta.DatabaseVersion == 1 && meta.AppVersion == "0.1.0")
+	compatible := (meta.DatabaseVersion == domain.DatabaseVersion && (meta.AppVersion == domain.AppVersion || meta.AppVersion == "0.1.1")) || (meta.DatabaseVersion == 1 && meta.AppVersion == "0.1.0")
 	if meta.FormatVersion != 1 || !compatible {
 		return "", nil, 0, fmt.Errorf("备份/App/数据库版本不兼容，要求 1 / %s / %d", domain.AppVersion, domain.DatabaseVersion)
 	}

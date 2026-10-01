@@ -1,6 +1,6 @@
 # v0.1 执行记录
 
-时区：Asia/Shanghai（UTC+08:00）。目标状态：v0.1.1 题集清理迭代及可执行范围验收完成；原生 UI 操作验收待人工。当前阶段：6。
+时区：Asia/Shanghai（UTC+08:00）。目标状态：v0.1.2 基础练习体验迭代进行中。当前阶段：7。
 
 | 阶段 | 状态 | 关联提交 |
 | --- | --- | --- |
@@ -11,6 +11,14 @@
 | 4 备份与日常使用 | 已完成 | 8bd2d1a |
 | 5 最终验收与交付 | 已完成 | 1190faf |
 | 6 题集删除与归档 | 已完成 | 49b21d8 |
+| 7 基础练习体验与 CI | 进行中 | 待验证提交 |
+
+## 阶段 7 — 基础练习体验与 CI
+
+- 2026-10-01 19:32 +08:00：开始，重新读取 AGENTS、README、需求、计划/记录、实际 UI/服务/仓储与 CI。基线 feature/mvp-v0.1，工作区干净，origin=https://github.com/yitau/cissp-quiz-trainer.git。用户授权验证后提交推送并确认 Actions 成功。
+- 已确认：历史考试进度错误使用 scored；继续总回首题；交卷仅显示未完成数量；缺本次错题重练。CI 仅监听 main，需要追加功能分支触发。
+- gh auth status 确认 yitau 已登录；提权 shell 的 git ls-remote 未定位仓库，将改用明确工作目录及命令级 safe.directory 重试。
+- 业务决策及验收顺序见计划阶段 7。下一步实现服务输出、UI 检查与重练及回归测试；本阶段尚未执行验证或推送。
 
 ## 阶段 0 — 基线与业务规则
 
@@ -96,3 +104,13 @@
 - 本地 EXE/ZIP 已重新打包（build/bin）：EXE 16,070,656 字节，ZIP 6,765,919 字节；SHA-256 分别为 de691673505d21e540dbe81251c3452e6d461c955af33aa807d8a2734e261724 / cb41355ee17572af83d305b754cb081f3740a36f6fb2bf5d835aebd49a421396。
 - git diff --check 通过。原生 UI 本轮没有操作验证，仍按 user-guide.md 删除/归档人工验收步骤核对对话框取消/确认、切换列表与键盘；不将类型检查或构建称为 UI 验收通过。下一步：使用更新 ZIP 进行人工界面验收。本地提交后继续保留不推送边界。
 - 阶段 6 关联功能提交：49b21d8。提交后 git status --short 为空；本次仅补入该关联号。分支仍为 feature/mvp-v0.1，没有推送。
+
+### 阶段 7 实现与首轮验证（2026-10-01 19:42:11 +08:00，Asia/Shanghai）
+
+- 已实现进度区分、基于持久化答案的下一未完成题续答、题号筛选与交卷前未完成列表、本次错题/漏答筛选及独立学习重练；数据库仍为 2，产品 0.1.2，兼容 0.1.0/0.1.1 备份。更新使用说明与需求范围。
+- 关键文件：internal/service/session_review.go 与测试、domain/models.go、repository/sqlite/trainer.go、service/backup.go、app.go、frontend/src/App.vue、services/api.ts、.github/workflows/ci.yml。未增加依赖或迁移。
+- 定向测试 TestProgressAndResume / TestSessionMistakes / TestVersion011 通过，覆盖真实 DB 关闭重启、草稿保密/不计分、选择清空、全答完标记回退、原结果不变、归档题复习、全对/未交卷拒绝及 0.1.1 备份恢复。
+- gofmt -w . / gofmt -l .、npm --prefix frontend run type-check / build、go vet ./...、go test ./... -count=1 -json 均通过。tmp/iteration7-tests.jsonl：18 顶层 + 26 子用例、失败 0。git diff --check 通过。
+- wails build -clean 两次因正在运行的旧版 EXE（PID 51716）无法覆盖而失败。普通沙箱 Get-Process 的空结果不能证明进程已退出；提权只读查询确认窗口仍在。已请用户关闭，未终止用户进程。
+- 改用 wails build -o CISSPQuizTrainer-v0.1.2.exe 完成实际 Windows 生产构建，生成正式 bindings。原生窗口读取返回 minimized，尚未执行新版界面操作。
+- 远端只存在 main@9fb84ed，GitHub yitau 已登录；复用当前 feature/mvp-v0.1。下一步提交推送本次功能，跟踪 Actions 干净构建，旧窗口关闭后更新默认 EXE/ZIP 并验收新窗口。

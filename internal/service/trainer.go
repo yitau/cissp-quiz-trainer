@@ -146,6 +146,7 @@ func (t *Trainer) create(ctx context.Context, title, mode string, qs []domain.Qu
 	return visible(s), nil
 }
 func visible(s domain.Session) domain.Session {
+	s.ResumeIndex = resumeIndex(s)
 	s.Statistics = sessionStatistics(s)
 	if s.CompletedAt != "" {
 		start, _ := time.Parse(time.RFC3339Nano, s.StartedAt)
@@ -153,6 +154,7 @@ func visible(s domain.Session) domain.Session {
 		s.DurationSeconds = int64(end.Sub(start).Seconds())
 	}
 	for i := range s.Items {
+		s.Items[i].Progress = itemProgress(s, s.Items[i])
 		if s.Status != "completed" && (s.Mode == "exam" || !s.Items[i].Scored) {
 			s.Items[i].Question = domain.HideSolution(s.Items[i].Question)
 			s.Items[i].Correct = nil

@@ -58,8 +58,10 @@ Vue → frontend services → Wails 薄适配器 → service → repository 接�
 
 v0.1.1 支持无练习历史题集的确认删除，有历史题集可归档和恢复显示；未完成会话也受删除保护。数据库自动迁移至版本 2，旧版 0.1.0 完整备份仍可恢复。
 
+v0.1.2 修正考试已选进度；继续时定位下一道未完成题，答题卡区分草稿与提交并支持未答/待提交/标记检查；结果可筛选本次错题/漏答并创建独立学习复习。数据库仍为版本 2，兼容 0.1.0/0.1.1 完整备份。
+
 不实现题目编辑、单题/批量删除、回收站或合并、Markdown/文本导入、高级组卷、复杂诊断、账号/云/AI/付费或自动更新。应用不进行网络访问；开发依赖下载不属于运行期功能。
 
 ## 发布边界
 
-`./scripts/package.ps1` 只在本地产出包含 EXE、演示 JSON、中文说明的 ZIP 及 SHA-256 清单。构建产物、bindings、数据库、日志和本地备份均不提交。CI 构建 artifact，不自动发布 GitHub Release。本次无推送、合并、标签或远程发布。
+`./scripts/package.ps1` 只在本地产出包含 EXE、演示 JSON、中文说明的 ZIP 及 SHA-256 清单。构建产物、bindings、数据库、日志和本地备份均不提交。CI 对 main、feature/mvp-v0.1 的 push 和面向 main 的 PR 执行检查并构建 artifact，不自动发布 GitHub Release。阶段 7 用户授权验证后提交推送功能分支并核验 Actions；不合并、打标签或发布 Release。
