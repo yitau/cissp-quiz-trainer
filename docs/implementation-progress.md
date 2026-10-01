@@ -1,6 +1,6 @@
 # v0.1 执行记录
 
-时区：Asia/Shanghai（UTC+08:00）。目标状态：v0.1.2 基础练习体验迭代进行中。当前阶段：7。
+时区：Asia/Shanghai（UTC+08:00）。目标状态：v0.1.2 实现、本地自动检查、独立 EXE/ZIP 和远端 CI 已通过并推送；原生 UI 验收受运行中的旧窗口阻塞，持续目标尚未完成。当前阶段：7。
 
 | 阶段 | 状态 | 关联提交 |
 | --- | --- | --- |
@@ -11,7 +11,7 @@
 | 4 备份与日常使用 | 已完成 | 8bd2d1a |
 | 5 最终验收与交付 | 已完成 | 1190faf |
 | 6 题集删除与归档 | 已完成 | 49b21d8 |
-| 7 基础练习体验与 CI | 进行中 | 待验证提交 |
+| 7 基础练习体验与 CI | 受阻（仅原生 UI 验收） | 4bdc02b、2eade2b |
 
 ## 阶段 7 — 基础练习体验与 CI
 
@@ -121,3 +121,13 @@
 - gh run view --log-failed 显示全部 Go 文件需要格式化；原因是 Windows 默认 autocrlf 检出，没有仓库级 LF 约束。新增 .gitattributes 的 *.go text eol=lf，保留原 gofmt 检查，未关闭检查或自动格式化掩盖错误。
 - 独立本地产物 build/bin/CISSPQuizTrainer-v0.1.2.exe（16076288 字节）和 CISSPQuizTrainer-v0.1.2-win-x64.zip 已生成；ZIP 已核对只含 EXE、原创演示 JSON 和使用说明。旧版窗口仍占用默认 EXE，尚未做新版 UI 验收。
 - 下一步：提交换行修复，验证全新检出格式，继续跟踪修复后的完整 Actions。
+
+### 远端验收通过与待恢复工作（2026-10-01 19:52:49 +08:00，Asia/Shanghai）
+
+- 2eade2b 的 GitHub Actions 全部 success：https://github.com/yitau/cissp-quiz-trainer/actions/runs/36857696248 。实际完成 Windows 干净 Wails 生产构建、Node 22 type-check/build、gofmt、go vet、go test、ZIP 打包和 artifact 上传；artifact CISSPQuizTrainer-win-x64 可下载。首轮失败已修复，没有减少检查。
+- 本地 clone 因源仓库跨用户 ownership 失败，随后从已核实 origin URL 克隆到 tmp/iteration7-remote-clean，core.autocrlf=true 下 ls-files --eol 确认 Go 全部 i/lf、w/lf、eol=lf；gofmt -l 空输出，验证换行修复。
+- 本地新版 EXE 绝对路径：C:/Users/17361/Documents/code/cissp-quiz-trainer/build/bin/CISSPQuizTrainer-v0.1.2.exe，SHA256 b9a206d98cdf004cebf4e111c98432e839c9960cde5df93b313b0e292e4ad4b8。
+- 本地新版 ZIP 绝对路径：C:/Users/17361/Documents/code/cissp-quiz-trainer/build/bin/CISSPQuizTrainer-v0.1.2-win-x64.zip，SHA256 67531fcf4d86900d6ad2eb2017a435fb592abb428523c5121505dad3ab95def6。内含默认命名 EXE、demo-questions.json、使用说明.md；无数据库/私有数据。
+- 验证分类：业务/SQLite 重启和新旧备份测试通过；Windows 生产构建通过；本轮新版启动及原生界面操作未验证。旧版 PID 51716 仍在运行，占用默认 EXE，且应用为单实例。已发出关闭窗口请求，未强行关闭或使用真实数据测试。UI 工具针对旧窗口返回 minimized，此结果不代表新版 UI 已通过。
+- 当前剩余步骤：用户关闭旧版后，执行 wails build -clean 与 scripts/package.ps1，使用 CISSP_QUIZ_DATA_DIR=仓库/tmp/iteration7-ui 启动；按 user-guide.md 的 v0.1.2 步骤验证导入、进度/续答、交卷检查、结果筛选、重练、重启与隔离备份恢复；记录真实结果，修复问题并提交推送，再检查最终提交 CI。
+- 本记录及 README 验证口径将提交推送；最终文档提交也必须检查 Actions。未合并、打标签或发布 Release。持续目标保留未完成，不以代码/CI 通过替代原生验收。
