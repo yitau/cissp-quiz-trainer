@@ -10,7 +10,7 @@
 | 3 复习与统计 | 已完成 | bfc64a5 |
 | 4 备份与日常使用 | 已完成 | 8bd2d1a |
 | 5 最终验收与交付 | 已完成 | 1190faf |
-| 6 题集删除与归档 | 已完成 | 本轮功能提交（下方补入） |
+| 6 题集删除与归档 | 已完成 | 49b21d8 |
 
 ## 阶段 0 — 基线与业务规则
 
@@ -95,3 +95,4 @@
 - 全量 gofmt -w . / gofmt -l .、go vet ./...、go test ./... -count=1 -json、npm --prefix frontend run type-check、npm --prefix frontend run build、wails build -clean、scripts/package.ps1 全通过。测试证据 tmp/iteration6-tests.jsonl：15 顶层测试 + 22 子用例通过，失败 0。全部为临时隔离数据；没有运行真实数据删除。
 - 本地 EXE/ZIP 已重新打包（build/bin）：EXE 16,070,656 字节，ZIP 6,765,919 字节；SHA-256 分别为 de691673505d21e540dbe81251c3452e6d461c955af33aa807d8a2734e261724 / cb41355ee17572af83d305b754cb081f3740a36f6fb2bf5d835aebd49a421396。
 - git diff --check 通过。原生 UI 本轮没有操作验证，仍按 user-guide.md 删除/归档人工验收步骤核对对话框取消/确认、切换列表与键盘；不将类型检查或构建称为 UI 验收通过。下一步：使用更新 ZIP 进行人工界面验收。本地提交后继续保留不推送边界。
+- 阶段 6 关联功能提交：49b21d8。提交后 git status --short 为空；本次仅补入该关联号。分支仍为 feature/mvp-v0.1，没有推送。
