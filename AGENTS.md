@@ -6,7 +6,7 @@ This file applies to the entire repository.
 
 Build **CISSP Quiz Trainer**, a local-first Windows 11 desktop application primarily for the owner's personal CISSP study and exam preparation. Prioritize reliable daily practice and review with a simple interface.
 
-The product and architecture baseline is documented in `docs/requirements-v0.3.md`. Treat that document as the primary source of truth unless the user explicitly changes the requirements.
+The existing v0.1.2 quiz behavior and architecture baseline are specified in `docs/requirements-v0.3.md`. For the approved v0.2 knowledge-learning increment, `docs/requirements-v0.4.md` and `docs/knowledge-learning-v0.4-goals.md` are the implementation source of truth; v0.3 still applies to unchanged features.
 
 ## Technical baseline
 
@@ -55,6 +55,12 @@ The machine-readable import format is the JSON Question Schema v1 defined in `do
 Do not silently make incompatible schema changes. Import code must validate `schemaVersion`, reject malformed required fields with actionable errors, detect duplicates/conflicts, never silently discard invalid questions, and preserve stable question IDs.
 
 If a schema-breaking change is required, update documentation and introduce a new schema version.
+
+## Lesson-file contract (v0.2 scope)
+
+The independent knowledge-lesson import format is `cissp-lesson` / `schemaVersion: "1.0"`. Follow `docs/requirements-v0.4.md`, `docs/schemas/lesson-v1.schema.json` and its cross-reference/whitespace/duplicate-key validation rules. The source example is `samples/cissp-week01-day01-lesson.json`.
+
+Keep Lesson JSON separate from Question JSON v1.0. Course progress is a separate durable record and must never change quiz scores, reveal exam answers or overwrite question history. All v0.2 P0 acceptance criteria are in `docs/knowledge-learning-v0.4-goals.md`. P1/P2 are not authorized.
 
 ## CISSP behavior rules
 
@@ -205,7 +211,7 @@ Bug fixes in core logic should add regression tests when practical.
 
 ## Scope control
 
-For v0.1, follow the personal-use boundary in sections 1.1 and 35 of `docs/requirements-v0.3.md`. Other feature descriptions and future-version lists do not automatically expand the MVP or the current task.
+For existing v0.1 functionality, preserve the personal-use boundary in `docs/requirements-v0.3.md`. The authorized v0.2 knowledge-learning work is limited to the P0 requirements in `docs/requirements-v0.4.md` and `docs/knowledge-learning-v0.4-goals.md`. Future-feature lists do not authorize implementation.
 
 ### Keep the project simple
 
