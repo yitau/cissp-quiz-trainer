@@ -142,6 +142,8 @@ func (t *Trainer) Restore(ctx context.Context, path, safetyDir string) (string, 
 	}
 	t.preview = nil
 	t.token = ""
+	t.lessonPreview = nil
+	t.lessonToken = ""
 	return safety, nil
 }
 func unpack(path, dir string) (string, map[string]string, int, error) {
@@ -185,7 +187,7 @@ func unpack(path, dir string) (string, map[string]string, int, error) {
 	if err := json.Unmarshal(entries["metadata.json"], &meta); err != nil {
 		return "", nil, 0, err
 	}
-	compatible := (meta.DatabaseVersion == domain.DatabaseVersion && (meta.AppVersion == domain.AppVersion || meta.AppVersion == "0.1.1")) || (meta.DatabaseVersion == 1 && meta.AppVersion == "0.1.0")
+	compatible := (meta.DatabaseVersion == 3 && meta.AppVersion == domain.AppVersion) || (meta.DatabaseVersion == 2 && (meta.AppVersion == "0.1.1" || meta.AppVersion == "0.1.2")) || (meta.DatabaseVersion == 1 && meta.AppVersion == "0.1.0")
 	if meta.FormatVersion != 1 || !compatible {
 		return "", nil, 0, fmt.Errorf("备份/App/数据库版本不兼容，要求 1 / %s / %d", domain.AppVersion, domain.DatabaseVersion)
 	}
@@ -206,6 +208,9 @@ func unpack(path, dir string) (string, map[string]string, int, error) {
 	return snapshot, config, meta.DatabaseVersion, nil
 }
 func validateContents(c domain.BackupContents) error {
+	if err := validateLessonContents(c); err != nil {
+		return err
+	}
 	expected := map[string]domain.StoredQuestion{}
 	sets := map[string]bool{}
 	for _, doc := range c.Documents {

@@ -4,3 +4,4 @@ export { Statistics, Review, SetFavorite, StartReview } from '../../wailsjs/go/m
 export { CreateBackup, RestoreBackup } from '../../wailsjs/go/main/App'
 export { DeleteUnusedSet, SetArchived } from '../../wailsjs/go/main/App'
 export { StartSessionReview } from '../../wailsjs/go/main/App'
+export { ChooseLessonImport, ConfirmLessonImport, CancelLessonImport, ListLessons, GetLesson, OpenConcept, SetConceptStatus } from '../../wailsjs/go/main/App'

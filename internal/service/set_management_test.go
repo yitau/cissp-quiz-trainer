@@ -310,7 +310,7 @@ func TestMigrationV1AndLegacyBackup(t *testing.T) {
 		t.Fatal("migration lost data", stats, err)
 	}
 	var version int
-	if err := db.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != 2 {
+	if err := db.QueryRow("PRAGMA user_version").Scan(&version); err != nil || version != domain.DatabaseVersion {
 		t.Fatal(version, err)
 	}
 	sets, err := svc.ListSets(ctx)

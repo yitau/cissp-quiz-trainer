@@ -1,9 +1,9 @@
 # CISSP Quiz Trainer — 知识学习模块需求规范 v0.4
 
-> 文档状态：v0.2.0 实施基线（需求已定义，功能尚未实现）  
+> 文档状态：v0.2.0 实施基线（P0 已实现，验收见 knowledge-learning-v0.2-acceptance.md）
 > 日期：2026-10-08  
 > 代码基线：`main` 已合并的 v0.1.2  
-> 目标产品版本：v0.2.0（建议，非当前已发布版本）  
+> 目标产品版本：v0.2.0（功能分支构建，未发布 Release）
 > 目标平台：Windows 11 x64，本地离线  
 > 主要关联文档：[既有需求基线 v0.3](requirements-v0.3.md)、[实施目标及验收](knowledge-learning-v0.4-goals.md)、[机器可读 Lesson Schema](schemas/lesson-v1.schema.json)、[Day 1 学习包](../samples/cissp-week01-day01-lesson.json)
 
@@ -222,4 +222,4 @@
 4. 用既有 `set.id` 打通关联题库和考试，不绕过归档检查；
 5. 执行 Go、Vue、Windows Wails 构建和打包，并记录原生 UI 验收。
 
-交付状态：**本文、Schema、示例与验收清单构成开发任务输入，不表示软件已经实现该功能。**
+交付状态：本文保持需求基线；P0 实现与实际验收证据见 [v0.2.0 验收记录](knowledge-learning-v0.2-acceptance.md)，未执行项在该记录单独列明。

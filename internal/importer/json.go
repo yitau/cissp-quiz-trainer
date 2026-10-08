@@ -28,6 +28,12 @@ func Parse(data []byte) (domain.QuestionFile, error) {
 	if err := json.Unmarshal(data, &f); err != nil {
 		return f, fmt.Errorf("字段类型错误：%w", err)
 	}
+	var format struct {
+		Format string `json:"format"`
+	}
+	if json.Unmarshal(data, &format) == nil && format.Format == "cissp-lesson" {
+		return f, fmt.Errorf("文件是课程 JSON，请在知识学习中打开")
+	}
 	if f.SchemaVersion != "1.0" {
 		return f, fmt.Errorf("schemaVersion 必须为 1.0，收到 %q", f.SchemaVersion)
 	}

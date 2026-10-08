@@ -31,7 +31,7 @@ func schema(ctx context.Context, db *sql.DB) (string, error) {
 	return schemaForVersion(ctx, db, domain.DatabaseVersion)
 }
 func schemaForVersion(ctx context.Context, db *sql.DB, version int) (string, error) {
-	rows, err := db.QueryContext(ctx, "SELECT type,name,coalesce(sql,'') FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND (? <> 1 OR name <> 'question_set_archives') ORDER BY type,name", version)
+	rows, err := db.QueryContext(ctx, "SELECT type,name,coalesce(sql,'') FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND (? <> 1 OR name <> 'question_set_archives') AND (? >= 3 OR name NOT IN ('learning_units','learning_progress')) ORDER BY type,name", version, version)
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +74,7 @@ func (r *Store) PrepareSnapshot(ctx context.Context, path string, expectedVersio
 	if actual != expected {
 		return fmt.Errorf("备份数据库结构与版本不匹配")
 	}
-	if version == 1 {
+	if version < domain.DatabaseVersion {
 		migrated, err := database.Open(path)
 		if err != nil {
 			return fmt.Errorf("升级备份临时副本：%w", err)
@@ -182,6 +182,17 @@ func (r *Store) InspectSnapshot(ctx context.Context, path string) (domain.Backup
 		return out, err
 	}
 	other := New(db)
+	out.Lessons, err = other.ListLessons(ctx)
+	if err != nil {
+		return out, err
+	}
+	for _, lesson := range out.Lessons {
+		progress, err := other.LessonProgress(ctx, lesson.ID)
+		if err != nil {
+			return out, err
+		}
+		out.LessonProgress = append(out.LessonProgress, progress...)
+	}
 	summaries, err := other.ListSessions(ctx)
 	if err != nil {
 		return out, err
@@ -238,12 +249,12 @@ func (r *Store) RestoreSnapshot(ctx context.Context, path string) error {
 		return err
 	}
 	defer tx.Rollback()
-	for _, table := range []string{"quiz_answers", "question_flags", "quiz_sessions", "questions", "question_set_archives", "question_sets", "app_settings"} {
+	for _, table := range []string{"learning_progress", "learning_units", "quiz_answers", "question_flags", "quiz_sessions", "questions", "question_set_archives", "question_sets", "app_settings"} {
 		if _, err := tx.ExecContext(ctx, "DELETE FROM main."+table); err != nil {
 			return fmt.Errorf("恢复清理事务失败：%w", err)
 		}
 	}
-	for _, table := range []string{"question_sets", "question_set_archives", "questions", "quiz_sessions", "quiz_answers", "question_flags", "app_settings"} {
+	for _, table := range []string{"learning_units", "learning_progress", "question_sets", "question_set_archives", "questions", "quiz_sessions", "quiz_answers", "question_flags", "app_settings"} {
 		if _, err := tx.ExecContext(ctx, "INSERT INTO main."+table+" SELECT * FROM restore_source."+table); err != nil {
 			return fmt.Errorf("恢复写入事务失败：%w", err)
 		}

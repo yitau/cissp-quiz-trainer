@@ -1,7 +1,7 @@
 package domain
 
-const AppVersion = "0.1.2"
-const DatabaseVersion = 2
+const AppVersion = "0.2.0"
+const DatabaseVersion = 3
 
 type StoredQuestion struct {
 	SetID    string
@@ -9,10 +9,12 @@ type StoredQuestion struct {
 	Question Question
 }
 type BackupContents struct {
-	Documents []string
-	Questions []StoredQuestion
-	Sessions  []Session
-	Settings  map[string]string
+	Lessons        []StoredLesson
+	LessonProgress []LessonProgress
+	Documents      []string
+	Questions      []StoredQuestion
+	Sessions       []Session
+	Settings       map[string]string
 }
 type BackupMetadata struct {
 	FormatVersion   int    `json:"formatVersion"`

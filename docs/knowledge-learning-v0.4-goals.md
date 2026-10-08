@@ -1,6 +1,6 @@
 # v0.4 → v0.2.0：知识学习模块 Implementation Goals 与验收矩阵
 
-> 日期：2026-10-08；状态：开发执行任务输入（并非功能完成报告）  
+> 日期：2026-10-08；状态：G1～G5 P0 已实施；实际结果见 [v0.2.0 验收记录](knowledge-learning-v0.2-acceptance.md)
 > 需求权威：[requirements-v0.4.md](requirements-v0.4.md)  
 > Lesson 契约：[schemas/lesson-v1.schema.json](schemas/lesson-v1.schema.json)  
 > Day 1 样例：[../samples/cissp-week01-day01-lesson.json](../samples/cissp-week01-day01-lesson.json)  

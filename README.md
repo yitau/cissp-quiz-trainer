@@ -1,6 +1,6 @@
 # CISSP Quiz Trainer
 
-Windows 11 x64 本地 CISSP 学习工具：JSON 导入 → 学习/考试 → 解析 → 错题/收藏 → 统计 → 完整备份恢复。
+Windows 11 x64 本地 CISSP 学习工具：课程与题库 JSON 导入 → 知识阅读/自检 → 学习/考试 → 错题/收藏 → 完整备份恢复。
 
 ## 使用
 
@@ -10,7 +10,7 @@ Windows 11 x64 本地 CISSP 学习工具：JSON 导入 → 学习/考试 → 解
 - [实施计划及业务规则](docs/implementation-plan.md)
 - [执行记录与验证证据](docs/implementation-progress.md)
 - [需求基线 v0.3](docs/requirements-v0.3.md)
-- [知识学习模块需求规范 v0.4（目标 v0.2，尚未实现）](docs/requirements-v0.4.md)
+- [知识学习模块需求规范 v0.4（v0.2.0 已实现）](docs/requirements-v0.4.md)
 - [知识学习开发 GOAL 与验收矩阵](docs/knowledge-learning-v0.4-goals.md)
 - [Lesson JSON Schema v1.0](docs/schemas/lesson-v1.schema.json)
 - [Week 01 Day 01 Lesson 示例 JSON](samples/cissp-week01-day01-lesson.json)
@@ -18,9 +18,9 @@ Windows 11 x64 本地 CISSP 学习工具：JSON 导入 → 学习/考试 → 解
 
 默认数据目录 `%LOCALAPPDATA%\CISSPQuizTrainer\data`，不写入 EXE 目录；通过 `CISSP_QUIZ_DATA_DIR` 可指定隔离目录。完全离线、无账号、无遥测。最终用户只需要 Windows 11 x64 和 WebView2 Runtime。
 
-## 知识学习模块（v0.2 开发计划，当前版本尚未实现）
+## 知识学习模块（v0.2.0）
 
-已在 `feature/knowledge-learning-v0.2` 分支定义独立“知识学习”模块：Lesson JSON → 阅读八个基础知识点及综合案例 → 理解自检与持久化学习进度 → 关联现有题库刷题。**这些功能目前只是需求和开发任务，不能在 v0.1.2 中直接使用。**开发与验收按照 v0.4 需求、Lesson Schema、GOAL 清单执行。现有 Question JSON v1.0 契约不变。
+在“知识学习”导入随包 `cissp-week01-day01-lesson.json`，预览确认后可阅读 2 章节、8 个知识点和综合案例。自检答案点击后显示，切换知识点默认隐藏；已理解/需复习及最近阅读位置保存到 SQLite，重启可继续。已理解 8/8 才是课程完成。关联题集按 `set.id` 精确定位，缺失时提示导入，已归档时引导恢复显示。课程不会计入答题统计，现有 Question JSON v1.0 契约不变。
 
 ## 开发环境
 
@@ -72,4 +72,9 @@ v0.1.2 修正考试已选进度；继续时定位下一道未完成题，答题�
 
 ## 发布边界
 
-`./scripts/package.ps1` 只在本地产出包含 EXE、演示 JSON、中文说明的 ZIP 及 SHA-256 清单。构建产物、bindings、数据库、日志和本地备份均不提交。CI 对 main、feature/mvp-v0.1 的 push 和面向 main 的 PR 执行检查并构建 artifact，不自动发布 GitHub Release。阶段 7 用户授权验证后提交推送功能分支并核验 Actions；不合并、打标签或发布 Release。
+`./scripts/package.ps1` 只在本地产出包含 EXE、演示题 JSON、Day 1 Lesson JSON、中文说明的 ZIP 及 SHA-256 清单。构建产物、bindings、数据库、日志和本地备份均不提交。CI 对 main、feature/mvp-v0.1、feature/knowledge-learning-v0.2 的 push 和面向 main 的 PR 执行检查并构建 artifact，不自动发布 GitHub Release。阶段 7 用户授权验证后提交推送功能分支并核验 Actions；不合并、打标签或发布 Release。
+
+
+数据库 v3 新增 learning_units / learning_progress，旧 v1/v2 原地迁移保留刷题数据。完整备份包含课程与进度，接受 App 0.1.0 / 0.1.1 / 0.1.2 的合法旧备份；仅迁移临时副本，恢复前保留安全备份。新版备份不向旧应用反向兼容。
+
+本次验收、命令结果和限制见 [v0.2.0 验收记录](docs/knowledge-learning-v0.2-acceptance.md)。本地已构建和打包，未创建 Release。

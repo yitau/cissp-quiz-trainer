@@ -167,3 +167,16 @@
 - 正式默认 ZIP：C:/Users/17361/Documents/code/cissp-quiz-trainer/build/bin/CISSPQuizTrainer-win-x64.zip（6768643 字节），SHA256 06680b9f40c69da52e25750cf85ceb435990b76fa54bfddddba14fc694318a6a。包含 EXE、原创演示题与最新中文说明，不含数据库、日志、私有题集或生成 bindings。
 - 复用分支 feature/mvp-v0.1，普通推送 origin，没有合并、标签或 Release。上述历史阻塞已解除；以前版本文件名仅为当时临时交付，本次正式交付以默认路径和本段校验值为准。
 - 本收据与 README 作为最后文档提交；推送后继续核验最后提交的 Actions，再结束持续目标，不重复执行无变化的本地业务测试。
+
+### v0.2.0 知识学习 G1～G5（2026-10-08，Asia/Shanghai）
+
+- 初始工作区干净；fetch 后按要求建立 `feature/knowledge-learning-v0.2` 本地跟踪分支，未覆盖用户变更。
+- G1：独立 Lesson domain / importer，16 MiB、UTF-8、闭合字段集、重复属性、必填/类型/范围、双向引用校验；预览/确认/取消、规范内容重复和冲突拒绝。
+- G2：migration 003 两张课程表；独立理解状态、最近阅读位置、UTC、事务与外键。扩展完整备份验证/恢复，真正 v1/v2 旧备份迁移及原始备份不变测试通过。
+- G3：真实持久化课程列表、按章节引用顺序的阅读器、双语概念、点击显示自检答案、三种可改状态、完成数、综合案例；安全文本渲染。
+- G4：精确 linkedQuestionSetId 查题集；缺失/归档阻止会话并引导；复用原 StartQuiz。实际本机 30 题文件经原生对话框导入隔离库，从课程成功进入学习及考试；私有题集不提交。
+- G5：本地最终 gofmt、go vet、go test ./... -count=1、frontend type-check/build、wails build -clean、package.ps1 全部通过。Wails 生成绑定，ZIP 含 EXE、demo-questions.json、cissp-week01-day01-lesson.json、使用说明.md。未新增依赖。
+- 原生 Win11：通过文件名输入完成 Lesson 和 Question 文件对话框、课程预览确认；阅读自检显示/隐藏/切换隐藏；已理解/需复习保存；退出重开定位 Integrity 保留状态；约 760 像素窄窗和 Shift+Tab/Enter/空格操作；综合案例五步逻辑。截图仅保存仓库课程内容。
+- 所有测试均使用 t.TempDir 或 CISSP_QUIZ_DATA_DIR 指向的临时隔离目录，不修改默认真实学习数据库。测试窗口已正常退出。
+- AC-01～AC-21 的逐项证据、精确命令与 NOT RUN 边界见 [v0.2.0 验收记录](knowledge-learning-v0.2-acceptance.md)。系统 DPI 矩阵、本轮原生备份恢复对话框和 UI 逐个标满八概念未执行，相关数据规则已自动化验证。
+- README、使用说明、需求状态、版本说明同步更新，目标分支纳入现有 CI；只提交推送功能分支，不合并 main、不创建 Release。

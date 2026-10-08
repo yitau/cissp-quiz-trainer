@@ -198,11 +198,12 @@ func TestVersion011BackupPreservesResumeAndReview(t *testing.T) {
 	if err := json.Unmarshal(entries["metadata.json"], &meta); err != nil {
 		t.Fatal(err)
 	}
-	meta.AppVersion = "0.1.1" // Same DB schema; previous application metadata must still be accepted.
+	meta.AppVersion = "0.1.1"
 	entries["metadata.json"], err = json.Marshal(meta)
 	if err != nil {
 		t.Fatal(err)
 	}
+	legacyV2Entries(t, entries, "0.1.1")
 	legacy := filepath.Join(t.TempDir(), "v011.zip")
 	writeZip(t, legacy, entries)
 	target, _, _, _ := setup(t)

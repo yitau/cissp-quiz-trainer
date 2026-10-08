@@ -20,6 +20,9 @@ var initial string
 //go:embed migrations/002_set_archives.sql
 var setArchives string
 
+//go:embed migrations/003_learning.sql
+var learning string
+
 func Open(path string) (*sql.DB, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 		return nil, fmt.Errorf("创建数据目录：%w", err)
@@ -66,8 +69,13 @@ func initialize(db *sql.DB) error {
 				return fmt.Errorf("数据库迁移 001：%w", err)
 			}
 		}
-		if _, err := tx.Exec(setArchives); err != nil {
-			return fmt.Errorf("数据库迁移 002：%w", err)
+		if version < 2 {
+			if _, err := tx.Exec(setArchives); err != nil {
+				return fmt.Errorf("数据库迁移 002：%w", err)
+			}
+		}
+		if _, err := tx.Exec(learning); err != nil {
+			return fmt.Errorf("数据库迁移 003：%w", err)
 		}
 		if err := tx.Commit(); err != nil {
 			return err

@@ -16,10 +16,12 @@ import (
 )
 
 type Trainer struct {
-	mu      sync.Mutex
-	repo    repository.Trainer
-	preview *domain.QuestionFile
-	token   string
+	mu            sync.Mutex
+	repo          repository.Trainer
+	preview       *domain.QuestionFile
+	token         string
+	lessonPreview *domain.LessonFile
+	lessonToken   string
 }
 
 func New(repo repository.Trainer) *Trainer { return &Trainer{repo: repo} }
