@@ -10,9 +10,17 @@ Windows 11 x64 本地 CISSP 学习工具：JSON 导入 → 学习/考试 → 解
 - [实施计划及业务规则](docs/implementation-plan.md)
 - [执行记录与验证证据](docs/implementation-progress.md)
 - [需求基线 v0.3](docs/requirements-v0.3.md)
+- [知识学习模块需求规范 v0.4（目标 v0.2，尚未实现）](docs/requirements-v0.4.md)
+- [知识学习开发 GOAL 与验收矩阵](docs/knowledge-learning-v0.4-goals.md)
+- [Lesson JSON Schema v1.0](docs/schemas/lesson-v1.schema.json)
+- [Week 01 Day 01 Lesson 示例 JSON](samples/cissp-week01-day01-lesson.json)
 - [开发约束](AGENTS.md)
 
 默认数据目录 `%LOCALAPPDATA%\CISSPQuizTrainer\data`，不写入 EXE 目录；通过 `CISSP_QUIZ_DATA_DIR` 可指定隔离目录。完全离线、无账号、无遥测。最终用户只需要 Windows 11 x64 和 WebView2 Runtime。
+
+## 知识学习模块（v0.2 开发计划，当前版本尚未实现）
+
+已在 `feature/knowledge-learning-v0.2` 分支定义独立“知识学习”模块：Lesson JSON → 阅读八个基础知识点及综合案例 → 理解自检与持久化学习进度 → 关联现有题库刷题。**这些功能目前只是需求和开发任务，不能在 v0.1.2 中直接使用。**开发与验收按照 v0.4 需求、Lesson Schema、GOAL 清单执行。现有 Question JSON v1.0 契约不变。
 
 ## 开发环境
 
