@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yitau/cissp-quiz-trainer/schemas/lesson-v1",
+  "title": "CISSP Quiz Trainer Lesson File v1.0",
+  "description": "Validate structural and type rules. Cross-references, duplicate JSON property names and whitespace-only strings must additionally be checked by importer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schemaVersion",
+    "lesson",
+    "sections",
+    "concepts"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "cissp-lesson"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "lesson": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "week",
+        "day",
+        "domain",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "description": {
+          "$ref": "#/$defs/text"
+        },
+        "week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "domain": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "linkedQuestionSetId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "$ref": "#/$defs/section"
+      }
+    },
+    "concepts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/$defs/concept"
+      }
+    },
+    "caseStudy": {
+      "$ref": "#/$defs/caseStudy"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "en",
+        "zh"
+      ],
+      "properties": {
+        "en": {
+          "$ref": "#/$defs/text"
+        },
+        "zh": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "recall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt",
+        "answer"
+      ],
+      "properties": {
+        "prompt": {
+          "$ref": "#/$defs/text"
+        },
+        "answer": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "conceptIds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "conceptIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      }
+    },
+    "concept": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sectionId",
+        "term",
+        "objective",
+        "definition",
+        "explanation",
+        "analogy",
+        "scenario",
+        "commonMistake",
+        "examTip",
+        "recall"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "sectionId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "term": {
+          "$ref": "#/$defs/term"
+        },
+        "objective": {
+          "$ref": "#/$defs/text"
+        },
+        "definition": {
+          "$ref": "#/$defs/text"
+        },
+        "explanation": {
+          "$ref": "#/$defs/text"
+        },
+        "analogy": {
+          "$ref": "#/$defs/text"
+        },
+        "scenario": {
+          "$ref": "#/$defs/text"
+        },
+        "controls": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "commonMistake": {
+          "$ref": "#/$defs/text"
+        },
+        "examTip": {
+          "$ref": "#/$defs/text"
+        },
+        "recall": {
+          "$ref": "#/$defs/recall"
+        }
+      }
+    },
+    "caseStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "detail"
+      ],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/text"
+        },
+        "detail": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "caseStudy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "background",
+        "steps",
+        "takeaway"
+      ],
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "background": {
+          "$ref": "#/$defs/text"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "$ref": "#/$defs/caseStep"
+          }
+        },
+        "takeaway": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    }
+  }
+}
